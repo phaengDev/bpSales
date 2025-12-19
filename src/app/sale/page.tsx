@@ -1,7 +1,7 @@
 'use client'
-import React, { useState, useEffect, useRef, use } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
-import { Input, InputPicker, InputGroup, IconButton, Grid, Row, Col, Placeholder, Loader } from 'rsuite';
+import { Input, InputGroup, IconButton, Grid, Row, Col, Placeholder, Loader, Box, Badge } from 'rsuite';
 import FormPaySales from './FormPaySales';
 import FormOrder from './FormOrder';
 import { CONFIG } from '../../utils/Config';
@@ -10,9 +10,12 @@ import { useCategory } from '../../utils/selectOption';
 import numeral from 'numeral';
 import { useToken } from '@/hooks/useToken';
 import { getLocalStorageItem } from '@/utils/storage';
-import ArrowBackIcon from '@rsuite/icons/ArrowBack';
+import TouchIcon from '@rsuite/icons/Touch';
 import BillSales from './billSales';
 import Payonline from './Payonline';
+// import SearchIcon from '@rsuite/icons/Search';
+import { Notific } from '@/utils/Notification';
+import ViewPrice from './ViewPrice';
 interface Product {
     product_uuid: string
     productName: string
@@ -78,7 +81,7 @@ const SalesPage: React.FC = () => {
 
     const [values, setValues] = useState({
         shopid: shopsId,
-        brandid:'',
+        brandid: '',
         categorieid: '',
     })
 
@@ -109,20 +112,19 @@ const SalesPage: React.FC = () => {
         }
     }
 
-useEffect(() => {
-    const handleScroll = () => {
-        const bottom =
-            window.innerHeight + window.scrollY >=
-            document.documentElement.scrollHeight;
+    useEffect(() => {
+        const handleScroll = () => {
+            const bottom =
+                window.innerHeight + window.scrollY >=
+                document.documentElement.scrollHeight;
 
-        if (bottom) {
-            setItemsPerPage((prev) => prev + 25);
-        }
-    };
-
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-}, []);
+            if (bottom) {
+                setItemsPerPage((prev) => prev + 25);
+            }
+        };
+        window.addEventListener("scroll", handleScroll);
+        return () => window.removeEventListener("scroll", handleScroll);
+    }, []);
 
 
     // ✅ useEffect โหลดข้อมูลเมื่อค่าเปลี่ยน
@@ -131,25 +133,22 @@ useEffect(() => {
         showProduct();
     }, [values, shopsId, token])
 
-    const [brandId, setBrandId] = useState(null);
+    const [categoryId, setCategoryId] = useState(null);
     const handleSearch = (index: any) => {
-        setBrandId(index);
+        setCategoryId(index);
         setValues({
             ...values,
             categorieid: index,
         });
-
-        const query = parseInt(index, 10);
-        if (!isNaN(query)) {
-            setProduct(filter.filter((n: any) => n.brandid === query));
-        } else {
-            setProduct(filter);
-        }
     };
 
 
     const handleFilter = (event: any) => {
         const query = event.toLowerCase();
+        setSearch({
+            ...search,
+            barcode: query,
+        });
         setProduct(
             filter.filter(
                 n =>
@@ -158,7 +157,52 @@ useEffect(() => {
             )
         );
     };
+    // =======get order by search ========
+    const [search, setSearch] = useState({
+        userbyid: userid,
+        shopsid: shopsId,
+        barcode: ''
+    });
+    const getOrder = async (event: React.FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
 
+        if (!token || !shopsId || !search.barcode) {
+            Notific.warning("Please scan or enter barcode");
+            return;
+        }
+        try {
+            const response = await axios.post(`${api}/order/getsale`, search,
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                }
+            );
+
+            const { data, message } = response.data;
+            Notific.success(message || "Order added successfully");
+            setResponse(data);
+            setSearch(prev => ({
+                ...prev,
+                barcode: ''
+            }));
+            setProduct(
+                filter.filter(
+                    n =>
+                        n.sku.toLowerCase().includes('') ||
+                        n.productName.toLowerCase().includes('')
+                )
+            );
+        } catch (error: any) {
+            console.error("Error fetching data:", error);
+
+            const msg =
+                error?.response?.data?.message ||
+                "Failed to add order";
+
+            Notific.error(msg);
+        }
+    };
 
 
     // ============================== FETCH CART ==============================
@@ -186,7 +230,7 @@ useEffect(() => {
         if (!userid || !token) return
         fetchOrder();
     }, [userid, token])
-
+    // =============================== PLUS CART ==============================
     const handlePlus = async (id: string) => {
         try {
             const response = await axios.put(api + '/order/plus/' + btoa(id), {}, {
@@ -201,7 +245,7 @@ useEffect(() => {
             console.error('Error fetching data:', error);
         }
     };
-
+    // ================================ MINUS CART ==============================
     const handleMinus = async (id: string) => {
         try {
             const response = await axios.put(api + '/order/minus/' + btoa(id), {}, {
@@ -216,7 +260,7 @@ useEffect(() => {
             console.error('Error fetching data:', error);
         }
     };
-
+    // =============================== DELETE CART ==============================
     const handleDelete = async (id: string) => {
         try {
             const response = await axios.delete(api + '/order/' + btoa(id), {
@@ -231,7 +275,7 @@ useEffect(() => {
             console.error('Error fetching data:', error);
         }
     };
-
+    // =============================== NEW FORM PAY ==============================
     const handleNewFormPay = () => {
         setOpenPay(true);
         setDataSale({
@@ -246,38 +290,44 @@ useEffect(() => {
             fetchOrder();
         }
     }, [response]);
-
+    // =============================== GET LOCALSTORAGE ==============================
     const [shopName, setShopName] = useState("");
     const [userName, setUserName] = useState("");
     useEffect(() => {
-    const value = getLocalStorageItem("shopName");
-    if (value) setShopName(value);
+        const value = getLocalStorageItem("shopName");
+        if (value) setShopName(value);
 
-    const value2 = getLocalStorageItem("userName");
-    if (value2) setUserName(value2);
-  }, []);
-
-const [openBill, setOpenBill] = useState(false);
-const [billid, setBillid] = useState(0);
-const printBill = () => {
-    setOpenBill(true);
-}
-
-useEffect(() => {
-    if (billid) {
+        const value2 = getLocalStorageItem("userName");
+        if (value2) setUserName(value2);
+    }, []);
+    // =============================== PRINT BILL ==============================
+    const [openBill, setOpenBill] = useState(false);
+    const [billid, setBillid] = useState(0);
+    const printBill = () => {
         setOpenBill(true);
     }
-}, [billid])
 
-const handlePayonline = () => {
-     setDataSale({
+    useEffect(() => {
+        if (billid) {
+            setOpenBill(true);
+        }
+    }, [billid])
+    // =============================== PAY ONLINE ==============================
+    const handlePayonline = () => {
+        setDataSale({
             dataOrder: itemOrder,
             total: sumTotal
         });
         setOpenOnline(true);
-}
-const [openOnline, setOpenOnline] = useState(false);
-
+    }
+    const [openOnline, setOpenOnline] = useState(false);
+    // ============ show price====
+    const [price, setPrice] = useState<any[]>([]);
+    const [openPrice, setOpenPrice] = useState(false);
+    const viewPrice = async(data:any)=>{
+        setPrice(data);
+        setOpenPrice(true);
+    }
     return (
         <div id="app" className="app app-content-full-height app-without-sidebar app-without-header" >
             <div id="content" className="app-content p-0">
@@ -295,7 +345,7 @@ const [openOnline, setOpenOnline] = useState(false);
                             <div data-scrollbar="true" data-height="100%" data-skip-mobile="true">
                                 <ul className="nav nav-tabs">
                                     <li className="nav-item">
-                                        <button type='button' className={`nav-link w-100  ${brandId === null && 'active'}`} onClick={() => handleSearch(null)} data-filter="all">
+                                        <button type='button' className={`nav-link w-100  ${categoryId === null && 'active'}`} onClick={() => handleSearch(null)} data-filter="all">
                                             <div className="nav-icon">
                                                 <i className="fa-solid fa-layer-group" />
                                             </div>
@@ -305,7 +355,7 @@ const [openOnline, setOpenOnline] = useState(false);
 
                                     {category.map((item, index) => (
                                         <li key={index} className="nav-item">
-                                            <button type='button' className={`nav-link w-100 ${brandId == item.value ? 'active' : ''}`} onClick={() => handleSearch(item.value)} data-filter={item.value}>
+                                            <button type='button' className={`nav-link w-100 ${categoryId == item.value ? 'active' : ''}`} onClick={() => handleSearch(item.value)} data-filter={item.value}>
                                                 <div className="nav-icon">
                                                     <i className="fa-solid fa-boxes-stacked" />
                                                 </div>
@@ -317,6 +367,16 @@ const [openOnline, setOpenOnline] = useState(false);
                                 </ul>
                             </div>
                         </div>
+                        <div className="logo text-center d-sm-block d-none p-0" >
+                            <Box c="white" bg="linear-gradient(45deg, #f23d1dff, #2196F3)" className='rounded-top-3 ' p={5}>
+                                <Badge content={990} shape="rectangle">
+                                    <div className="logo-img">
+                                        <img src="../assets/img/icon/bill-checkout.png" alt="" />
+                                    </div>
+                                </Badge>
+                                <div className="logo-text fs-4 text-white">ຍອດຂາຍ</div>
+                            </Box>
+                        </div>
                     </div>
                     {/* END pos-menu */}
                     {/* BEGIN pos-content */}
@@ -324,16 +384,18 @@ const [openOnline, setOpenOnline] = useState(false);
                         <div className='sticky-top bg-none  px-1 p-1 mb-2 rounded-3 nav-container' >
                             <Grid fluid>
                                 <Row>
-                                    <Col md={2} xs={0} className='text-center d-sm-block d-none'>
-                                        <IconButton icon={<ArrowBackIcon className='fs-5' />} onClick={() => window.location.href = '/'} appearance="ghost" color='red' />
+                                    <Col span={{ xs: 2, sm: 2, md: 1.5 }} className=' d-sm-block d-none'>
+                                        <IconButton size='lg' icon={<i className="fa-solid fa-arrow-left" />} onClick={() => window.location.href = '/'} appearance="ghost" color='red' />
                                     </Col>
-                                    <Col md={22} xs={24}>
-                                        <InputGroup inside size='lg'>
-                                            <Input ref={inputRef} onChange={handleFilter} placeholder='ຄົ້ນຫາ ຊື່ສິນຄ້າ/ ລະຫັດສິນຄ້າ/ ລະຫັດບາໂຄດ (Ctrl+F)' className='fs-5' />
-                                            <InputGroup.Addon>
-                                                <i className='fas fa-search' />
-                                            </InputGroup.Addon>
-                                        </InputGroup>
+                                    <Col span={{ md: 22, xs: 'auto' }}>
+                                        <form onSubmit={getOrder}>
+                                            <InputGroup inside size='lg' className='border-red'>
+                                                <Input ref={inputRef} onChange={handleFilter} value={search.barcode} placeholder='ຄົ້ນຫາ ຊື່ສິນຄ້າ/ ລະຫັດສິນຄ້າ/ ລະຫັດບາໂຄດ (Ctrl+F)' className='fs-5' required />
+                                                <InputGroup.Button type='submit' color='red'>
+                                                    <i className='fas fa-search' />
+                                                </InputGroup.Button>
+                                            </InputGroup>
+                                        </form>
                                     </Col>
                                 </Row>
                             </Grid>
@@ -351,7 +413,7 @@ const [openOnline, setOpenOnline] = useState(false);
                                         </div>
                                         <div className='mt-2'>
                                             <Loader size='lg' content="ກຳລັງໂຫລດ..." vertical />
-                                            </div>
+                                        </div>
                                     </div>
                                 ) :
                                     product.length > 0 ? (
@@ -391,7 +453,7 @@ const [openOnline, setOpenOnline] = useState(false);
                                     ) :
                                         <div className="w-100 h-100 d-flex flex-column text-center justify-content-center align-items-center">
                                             <img src="../assets/img/icon/ic_no_result.svg" className='w-30' alt="" />
-                                            <h4 className='text-red'>---====--- ບໍ່ມີສິນຄ້າໃນປະເພດນີ້ ---====---</h4>
+                                            <h4 className='text-red'>--------- ບໍ່ມີສິນຄ້າໃນປະເພດນີ້ ----------</h4>
                                         </div>
 
                                 }
@@ -442,7 +504,7 @@ const [openOnline, setOpenOnline] = useState(false);
                                                         />
                                                         <div className="info">
                                                             <div className="title">{item?.product?.productName}</div>
-                                                            <div className="single-price fs-5">{numeral(item.salePrices).format('0,0')}</div>
+                                                            <div className="single-price fs-5">{numeral(item.salePrices).format('0,0')} {item?.product?.price.length > 0 && (<span className='px-2 text-red' role='button' onClick={()=>viewPrice(item?.product?.price)}><TouchIcon /></span>)}</div>
                                                             {/* <div className="desc">- size: large</div> */}
                                                             <div className="input-group qty">
                                                                 <div className="input-group-append">
@@ -502,7 +564,7 @@ const [openOnline, setOpenOnline] = useState(false);
                                         <i className="fa fa-receipt d-block fs-18px my-1" /> Bill
                                     </button>
                                     <button type='button' onClick={handlePayonline} className="btn btn-orange rounded-3 text-center me-10px w-70px" >
-                                        <i className="fa-solid fa-truck d-block fs-18px my-1"/> ອອນໄລນ໌
+                                        <i className="fa-solid fa-truck d-block fs-18px my-1" /> ອອນໄລນ໌
                                     </button>
                                     <button type='button' onClick={handleNewFormPay} className="btn btn-theme rounded-3 text-center flex-1">
                                         <i className="fa fa-shopping-cart d-block fs-18px my-1" />
@@ -534,12 +596,15 @@ const [openOnline, setOpenOnline] = useState(false);
             }
 
             {openBill &&
-        <BillSales open={openBill} onClose={() => setOpenBill(false)} billid={billid} />
-      }
+                <BillSales open={openBill} onClose={() => setOpenBill(false)} billid={billid} />
+            }
 
-      {openOnline &&
-        <Payonline open={dataSale} onClose={() => setOpenOnline(false)} data={dataSale} resPonse={setResponse} />
-      }
+            {openOnline &&
+                <Payonline open={dataSale} onClose={() => setOpenOnline(false)} data={dataSale} resPonse={setResponse} />
+            }
+            {openPrice && 
+            <ViewPrice open={openPrice} onClose={()=>setOpenPrice} data={price} />
+            }
         </div>
 
     )
