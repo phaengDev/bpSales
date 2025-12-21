@@ -1,6 +1,7 @@
+'use client';
 import React, { useState, useEffect } from 'react';
 import Modal from 'react-bootstrap/Modal';
-import { InputGroup, Input, NumberInput, Button, Whisper, Popover, RadioGroup, Radio, Grid, Row, Col, Stat, Loader,Textarea } from 'rsuite';
+import { InputGroup, Input, NumberInput, Button, Whisper, Popover, RadioGroup, Radio, Grid, Row, Col, Stat, Loader, Textarea, Toggle } from 'rsuite';
 // import SearchIcon from '@rsuite/icons/Search';
 import numeral from 'numeral';
 import axios from 'axios';
@@ -16,11 +17,11 @@ interface Props {
     reSpons: (data: any) => void;
     billId: (data: any) => void
 }
-const FormPaySales: React.FC<Props> = ({ open, handleClose, data, reSpons,billId }) => {
+const FormPaySales: React.FC<Props> = ({ open, handleClose, data, reSpons, billId }) => {
     const api = CONFIG.URLAPI;
     const token = useToken();
     const shopid = getLocalStorageItem('shopid');
-    const userid= getLocalStorageItem('user_uuid');
+    const userid = getLocalStorageItem('user_uuid');
     const country = getCountry();
     // const [searchAgent, setSearchAgent] = useState<any>({
     //     shopid: shopid,
@@ -79,10 +80,10 @@ const FormPaySales: React.FC<Props> = ({ open, handleClose, data, reSpons,billId
             setAutoAmounts([]);
         }
     }
-    const handleFocus = (name: "getCash" | "getTransfer" | "discount") => {
-        setActiveField(name);
-        setAutoAmounts([]); // 🔥 รีเซ็ตปุ่มทุกครั้งที่เปลี่ยนช่อง
-    };
+    // const handleFocus = (name: "getCash" | "getTransfer" | "discount") => {
+    //     setActiveField(name);
+    //     setAutoAmounts([]); // 🔥 รีเซ็ตปุ่มทุกครั้งที่เปลี่ยนช่อง
+    // };
 
     const handleQuickAdd = (amount: number) => {
         setInputs((prev: any) => ({
@@ -114,11 +115,12 @@ const FormPaySales: React.FC<Props> = ({ open, handleClose, data, reSpons,billId
     }, [inputs.getCash, inputs.getTransfer, inputs.balance_payable, inputs.discount]);
 
     const [genus, setGenus] = useState<string>("₭");
-
+    const [flag, setFlag] = useState<any>('🇱🇦');
     const handleCountry = (value: string | number, _event: React.SyntheticEvent) => {
         const selected = country.find((item) => item.value === value);
         const rate = selected?.rate ?? 1;
         const genusSymbol = selected?.genus ?? "₭";
+        setFlag(selected?.icon ?? '');
         setGenus(genusSymbol);
         setInputs((prev: any) => ({
             ...prev,
@@ -204,9 +206,73 @@ const FormPaySales: React.FC<Props> = ({ open, handleClose, data, reSpons,billId
         ? { size: 'lg' as const }
         : { fullscreen: true as const };
 
+    const [keyValue, setKeyValue] = useState<string>("");
+    useEffect(() => {
+        if (keyValue === "") {
+            setInputs((prev: any) => ({ ...prev, [activeField]: 0 }));
+        } else {
+            setInputs((prev: any) => ({
+                ...prev,
+                [activeField]: parseFloat(keyValue) || 0,
+            }));
+        }
+    }, [keyValue, activeField]);
+    const handleKeyPress = (key: string) => {
+        if (key === "C") {
+            setKeyValue("");
+            setInputs({
+                ...inputs,
+                discount: 0,
+                getCash: 0,
+                getTransfer: 0,
+                balance_pays: 0,
+            });
+            setAutoAmounts([]);
+            return;
+        }
+
+        if (key === "BACK") {
+            setKeyValue((prev) => prev.slice(0, -1));
+            return;
+        }
+
+        if (key === ".") {
+            setKeyValue((prev) => (prev.includes(".") ? prev : prev + "."));
+            return;
+        }
+
+        setKeyValue((prev) => prev + key);
+        setTimeout(restoreFocus, 0);
+    };
+    const handleFocus = (name: "getCash" | "getTransfer" | "discount") => {
+        setActiveField(name);
+        setKeyValue(String(inputs[name] || ""));
+        setAutoAmounts([]);
+    };
+
+    const cashRef = React.useRef<any>(null);
+    const transferRef = React.useRef<any>(null);
+    const discountRef = React.useRef<any>(null);
+
+    const focusMap: Record<string, React.RefObject<any>> = {
+        getCash: cashRef,
+        getTransfer: transferRef,
+        discount: discountRef,
+    };
+
+    const restoreFocus = () => {
+        const ref = focusMap[activeField];
+        ref?.current?.focus?.();
+    };
+
+    useEffect(() => {
+        restoreFocus();
+    }, [activeField]);
+
+
     return (
         <>
-            <Modal {...modalProps} show={open} onHide={handleClose} className='modal-pos'>
+            <Modal {...modalProps} show={open} onHide={handleClose} className='modal-pos' scrollable={true}>
                 <form onSubmit={handleSubmit}>
                     <Modal.Body className='modal-content modal-body-scroll'>
                         <div className="row">
@@ -230,8 +296,8 @@ const FormPaySales: React.FC<Props> = ({ open, handleClose, data, reSpons,billId
                                         </Whisper>
                                     </div>
                                     <div className="stats-info">
-                                        <h3>ຍອດທີ່ຕ້ອງຈ່າຍ</h3>
-                                        <p className='fs-1'>{numeral(inputs.balance_payable).format('0,0.00')} {genus}</p>
+                                        <h3>ຍອດທີ່ຕ້ອງຈ່າຍ <span className="text-orange fs-5">({flag}: {inputs.rate} ₭)</span></h3>
+                                        <p className='fs-1'>{numeral(inputs.balance_payable).format('0,0.000')} {genus}</p>
                                     </div>
                                 </div>
                             </div>
@@ -242,7 +308,7 @@ const FormPaySales: React.FC<Props> = ({ open, handleClose, data, reSpons,billId
                             <div className={`${inputs.discount > 0 ? 'col-sm-6 col-6' : 'col-sm-12 col-12'} mb-2`}>
                                 <div className="form-group">
                                     <label htmlFor="" className="form-label fs-5">ສ່ວນຫຼົດ</label>
-                                    <NumberInput size='lg' value={inputs.discount} onChange={(value) => handleChange('discount', value)} onFocus={() => handleFocus("discount")} placeholder="0,00" formatter={toThousands} className='px-1' />
+                                    <NumberInput ref={cashRef} size='lg' value={inputs.discount} onChange={(value) => handleChange('discount', value)} onFocus={() => handleFocus("discount")} placeholder="0,00" formatter={toThousands} className='px-1 border-orange' />
                                 </div>
                             </div>
                             {inputs.discount > 0 && (
@@ -260,18 +326,18 @@ const FormPaySales: React.FC<Props> = ({ open, handleClose, data, reSpons,billId
                             <div className="col-sm-6 mb-2">
                                 <div className="form-group">
                                     <label htmlFor="" className="form-label fs-5">ຮັບເງິນສົດ</label>
-                                    <NumberInput size='lg' value={inputs.getCash} onChange={(value) => handleChange('getCash', value)} onFocus={() => handleFocus("getCash")} placeholder="0,00" formatter={toThousands} className='px-1' />
+                                    <NumberInput ref={transferRef} size='lg' value={inputs.getCash} onChange={(value) => handleChange('getCash', value)} onFocus={() => handleFocus("getCash")} placeholder="0,00" formatter={toThousands} className='px-1' />
                                 </div>
                             </div>
                             <div className="col-sm-6 mb-2">
                                 <div className="form-group">
                                     <label htmlFor="" className="form-label fs-5">ຮັບເງິນໂອນ</label>
-                                    <NumberInput size='lg' value={inputs.getTransfer} onChange={(value) => handleChange('getTransfer', value)} onFocus={() => handleFocus("getTransfer")} placeholder="0,00" formatter={toThousands} className='px-1' />
+                                    <NumberInput ref={discountRef} size='lg' value={inputs.getTransfer} onChange={(value) => handleChange('getTransfer', value)} onFocus={() => handleFocus("getTransfer")} placeholder="0,00" formatter={toThousands} className='px-1' />
                                 </div>
                             </div>
                             {inputs.refund > 0 && (
                                 <div className="col-sm-12 mb-12">
-                                    <Stat bordered icon={<i className="fa-solid fa-kip-sign fs-1" />} className='bg-orange-200'>
+                                    <Stat bordered icon={<i className="fa-solid fa-kip-sign fs-1" />} className='bg-orange-200 py-2'>
                                         <Stat.Value>{numeral(inputs.refund).format('0,0.00')}</Stat.Value>
                                         <Stat.Label className='fs-5'>ເງິນທອນ</Stat.Label>
                                     </Stat>
@@ -279,7 +345,7 @@ const FormPaySales: React.FC<Props> = ({ open, handleClose, data, reSpons,billId
                             )}
                         </div>
                         {autoAmounts.length > 0 && (
-                            <Grid fluid className="w-100 mt-3">
+                            <Grid fluid className="w-100 mt-1">
                                 <Row gutter={4}>
                                     {autoAmounts.map((amt) => (
                                         <Col xs={6} key={amt}>
@@ -296,10 +362,39 @@ const FormPaySales: React.FC<Props> = ({ open, handleClose, data, reSpons,billId
                                 </Row>
                             </Grid>
                         )}
-                        <div className="form-group mt-2">
+                        <div className="fs-5 mb-2 text-end">
+                            <span className='px-3 fs-5'><i className="fa-regular fa-keyboard" /> keyboard</span>
+                            <Toggle size={'sm'} checkedChildren="ເປິດ" unCheckedChildren="ປິດ" defaultChecked />
+                        </div>
+                        <Grid fluid>
+                            <Row gutter={[3, 3]}>
+                                <Col span={6}><Button color="cyan" size='lg' appearance="primary" onClick={() => handleKeyPress("7")} className='fs-2' block> 7 </Button></Col>
+                                <Col span={6}><Button color="cyan" size='lg' appearance="primary" onClick={() => handleKeyPress("8")} className='fs-2' block> 8 </Button></Col>
+                                <Col span={6}><Button color="cyan" size='lg' appearance="primary" onClick={() => handleKeyPress("9")} className='fs-2' block> 9 </Button></Col>
+                                <Col span={6}><Button color="orange" size='lg' appearance="primary" onClick={() => handleKeyPress("BACK")} className='fs-2' block> <i className="fa-solid fa-delete-left fs-2" /></Button></Col>
+
+                                <Col span={6}><Button color="cyan" size='lg' appearance="primary" onClick={() => handleKeyPress("4")} className='fs-2' block> 4 </Button></Col>
+                                <Col span={6}><Button color="cyan" size='lg' appearance="primary" onClick={() => handleKeyPress("5")} className='fs-2' block> 5 </Button></Col>
+                                <Col span={6}><Button color="cyan" size='lg' appearance="primary" onClick={() => handleKeyPress("6")} className='fs-2' block> 6 </Button></Col>
+                                <Col span={6}><Button color="red" size='lg' appearance="primary" onClick={() => handleKeyPress("C")} className='fs-2' block>C</Button></Col>
+
+                                <Col span={6}><Button color="cyan" size='lg' appearance="primary" onClick={() => handleKeyPress("1")} className='fs-2' block> 1 </Button></Col>
+                                <Col span={6}><Button color="cyan" size='lg' appearance="primary" onClick={() => handleKeyPress("2")} className='fs-2' block> 2 </Button></Col>
+                                <Col span={6}><Button color="cyan" size='lg' appearance="primary" onClick={() => handleKeyPress("3")} className='fs-2' block> 3 </Button></Col>
+                                <Col span={6}><Button color="green" size='lg' appearance="primary" onClick={() => {
+                                    setKeyValue(String(inputs.balanceTotal));
+                                }} className='fs-3' block>ຈ່າຍພໍດິ</Button></Col>
+
+                                <Col span={6}><Button color="cyan" size='lg' appearance="primary" className='fs-2' onClick={() => handleKeyPress(".")} block> . </Button></Col>
+                                <Col span={6}><Button color="cyan" size='lg' appearance="primary" className='fs-2' onClick={() => handleKeyPress("0")} block> 0 </Button></Col>
+                                <Col span={6}><Button color="cyan" size='lg' appearance="primary" className='fs-2' onClick={() => handleKeyPress("00")} block> 00 </Button></Col>
+                                <Col span={6}><Button color="cyan" size='lg' appearance="primary" className='fs-2' onClick={() => handleKeyPress("000")} block>000</Button></Col>
+                            </Row>
+                        </Grid>
+                        {/* <div className="form-group mt-2">
                             <label htmlFor="" className="form-label fs-5">ລາຍລະອຽດ</label>
                             <Textarea  value={inputs.description} onChange={(e) => handleChange('description', e)} placeholder="ລາຍລະອຽດ"  />
-                        </div>
+                        </div> */}
                     </Modal.Body>
                     <Modal.Footer className={`modal-footer-responsive  ${!isDesktop ? "mobile" : ""}`}>
                         <div className="row w-100 m-0">
@@ -312,7 +407,7 @@ const FormPaySales: React.FC<Props> = ({ open, handleClose, data, reSpons,billId
                         </div>
                     </Modal.Footer>
                 </form>
-            </Modal>
+            </Modal >
 
         </>
     )

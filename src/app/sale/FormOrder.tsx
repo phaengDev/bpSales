@@ -82,8 +82,8 @@ const [loading, setLoading] = useState(false);
     return (
         <Modal size='lg' show={open} onHide={handleClose} className='modal-pos' backdrop="static">
             <Modal.Body className='p-0'>
-                <div className="modal-bodyp-0">
-                    <a href="#" onClick={handleClose} className="btn-close position-absolute top-0 end-0 m-4"></a>
+                <div className="modal-body p-0">
+                    <button onClick={handleClose} className="btn-close position-absolute top-0 end-0 m-4"/>
                     <div className="modal-pos-product">
                         <div className="modal-pos-product-img">
                             <div className="img" style={{ backgroundImage: `url(${data.images === '' || data.images === null ? images : data.url})` }} />

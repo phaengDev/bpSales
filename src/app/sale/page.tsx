@@ -10,9 +10,9 @@ import { useCategory } from '../../utils/selectOption';
 import numeral from 'numeral';
 import { useToken } from '@/hooks/useToken';
 import { getLocalStorageItem } from '@/utils/storage';
-import TouchIcon from '@rsuite/icons/Touch';
 import BillSales from './billSales';
 import Payonline from './Payonline';
+import EditIcon from '@rsuite/icons/Edit';
 // import SearchIcon from '@rsuite/icons/Search';
 import { Notific } from '@/utils/Notification';
 import ViewPrice from './ViewPrice';
@@ -21,21 +21,24 @@ interface Product {
     productName: string
     sku: string
     brandid: number
-    unitName: string
     sellPrices: number
     stock: number
     quantity: number
     images: string | null
+    url:string
+    unit:{
+        unitName:string
+    }
 }
 
-interface CartItem {
-    cart_uuid: string
-    product_id_fk: string
-    productName: string
-    salePrices: number
-    quantity: number | string | null
-    images: string | null
-}
+// interface CartItem {
+//     cart_uuid: string
+//     product_id_fk: string
+//     productName: string
+//     salePrices: number
+//     quantity: number | string | null
+//     images: string | null
+// }
 const SalesPage: React.FC = () => {
     const api = CONFIG.URLAPI;
     const images = '@/assets/img/icon/picture.jpg';
@@ -85,7 +88,7 @@ const SalesPage: React.FC = () => {
         categorieid: '',
     })
 
-    const [product, setProduct] = useState<any[]>([])
+    const [product, setProduct] = useState<Product[]>([])
     const [filter, setFilter] = useState<any[]>([])
     const [isLoading, setIsLoading] = useState(false);
     const [itemsPerPage, setItemsPerPage] = useState(25);
@@ -504,7 +507,7 @@ const SalesPage: React.FC = () => {
                                                         />
                                                         <div className="info">
                                                             <div className="title">{item?.product?.productName}</div>
-                                                            <div className="single-price fs-5">{numeral(item.salePrices).format('0,0')} {item?.product?.price.length > 0 && (<span className='px-2 text-red' role='button' onClick={()=>viewPrice(item?.product?.price)}><TouchIcon /></span>)}</div>
+                                                            <div className="single-price fs-5">{numeral(item.salePrices).format('0,0')} {item?.product?.price.length > 0 && (<span className='px-2 text-red' role='button' onClick={()=>viewPrice(item)}><EditIcon /></span>)}</div>
                                                             {/* <div className="desc">- size: large</div> */}
                                                             <div className="input-group qty">
                                                                 <div className="input-group-append">
@@ -561,7 +564,7 @@ const SalesPage: React.FC = () => {
                                 </div>
                                 <div className="d-flex align-items-center mt-3">
                                     <button type='button' onClick={printBill} className="btn btn-default rounded-3 text-center me-10px w-70px"  >
-                                        <i className="fa fa-receipt d-block fs-18px my-1" /> Bill
+                                        <i className="fa-solid fa-notes-medical fs-18px"></i> ຍົກເລີກ
                                     </button>
                                     <button type='button' onClick={handlePayonline} className="btn btn-orange rounded-3 text-center me-10px w-70px" >
                                         <i className="fa-solid fa-truck d-block fs-18px my-1" /> ອອນໄລນ໌
@@ -603,7 +606,7 @@ const SalesPage: React.FC = () => {
                 <Payonline open={dataSale} onClose={() => setOpenOnline(false)} data={dataSale} resPonse={setResponse} />
             }
             {openPrice && 
-            <ViewPrice open={openPrice} onClose={()=>setOpenPrice} data={price} />
+            <ViewPrice open={openPrice} onClose={()=>setOpenPrice(false)} data={price} resPonse={setResponse} />
             }
         </div>
 

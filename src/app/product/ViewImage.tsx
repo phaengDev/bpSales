@@ -70,9 +70,9 @@ const ViewImage: React.FC<Props> = ({ show, handleClose, item ,resPonse}) =>{
 
     return (
         <Modal show={show} onHide={handleClose} size="sm">
-            <Modal.Body className='profile p-0'>
-                <img src={files || imgPs} className='w-100' alt="" />
-                <div className="move-profile"> <IconButton color="red" size='xs' onClick={handleClose} appearance="primary" icon={<WarningRoundIcon />} /></div>
+            <Modal.Body className='profile  p-0'>
+                <img src={files || imgPs} className='w-100 rounded-3' alt="" />
+                <div className="move-profile me-n1 mt-n1"> <IconButton color="red" size='xs' onClick={handleClose} appearance="primary" icon={<WarningRoundIcon />} /></div>
                 <div className="bottom-left">
                     <label role='button' className='badge bg-green'><i className="fas fa-edit"></i> ປ່ຽນຮູບ
                         <input type="file" onChange={handleFileChange} className='d-none' />
