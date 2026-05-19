@@ -13,7 +13,7 @@ import {
 import WarningRoundIcon from '@rsuite/icons/WarningRound';
 import { useCategory, useBrand, useUnite, useSizes } from '../../utils/selectOption';
 import axios from 'axios';
-import { CONFIG } from '../../utils/Config';
+import { postApi, putApi } from '../../utils/Configs';
 import { Notific } from '../../utils/Notification';
 import { useToken } from '@/hooks/useToken';
 import { getLocalStorageItem } from '@/utils/storage';
@@ -41,7 +41,6 @@ interface ProductValues {
 }
 
 const FormProduct: React.FC<Props> = ({ open, handleClose, data, resPonse }) => {
-  const api = CONFIG.URLAPI;
 const token = useToken();
 const shopid = getLocalStorageItem('shopid');
 
@@ -116,7 +115,7 @@ const [loading, setLoading] = useState(false);
   setLoading(true);
   try {
     if(!data){
-    const response = await axios.post(`${api}/product/create`, values, {
+    const response = await postApi(`/product/create`, values, {
       headers: {
         Authorization: `Bearer ${token}`,
         'Content-Type': 'multipart/form-data',
@@ -129,7 +128,7 @@ const [loading, setLoading] = useState(false);
       Notific.success(response.data.message);
     }
   }else{
-    const response = await axios.put(`${api}/product/${btoa(data.product_uuid)}`, values, {
+    const response = await putApi(`/product/${btoa(data.product_uuid)}`, values, {
       headers: {
         Authorization: `Bearer ${token}`,
         'Content-Type': 'multipart/form-data',

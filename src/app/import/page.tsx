@@ -16,10 +16,9 @@ import SearchIcon from '@rsuite/icons/Search';
 import UnvisibleIcon from '@rsuite/icons/Unvisible';
 import EyeRoundIcon from '@rsuite/icons/EyeRound';
 import TrashIcon from '@rsuite/icons/Trash';
-import axios from 'axios';
 import numeral from 'numeral';
 
-import { CONFIG } from '@/utils/Config';
+import { postApi, getApi, deleteApi } from '@/utils/Configs';
 import { Notific } from '@/utils/Notification';
 import { useCategory } from '@/utils/selectOption';
 import { useToken } from '@/hooks/useToken';
@@ -45,7 +44,6 @@ interface DataValueItem {
 
 // ==========================================================
 const ItemPurchase: React.FC = () => {
-  const api = CONFIG.URLAPI;
   const userId = getLocalStorageItem('user_uuid');
   const shopId = getLocalStorageItem('shopid');
   const token = useToken();
@@ -86,7 +84,7 @@ const ItemPurchase: React.FC = () => {
   const fetchCart = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(`${api}/cartimport/fetch/${userId}?status=1`, {
+      const response = await getApi(`/cartimport/fetch/${userId}?status=1`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -152,7 +150,7 @@ const ItemPurchase: React.FC = () => {
   // -------------------- Delete Item --------------------
   const handleDelete = async (id: string) => {
     try {
-      const resault = await axios.delete(`${api}/cartimport/${id}`, {
+      const resault = await deleteApi(`/cartimport/${id}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -170,7 +168,7 @@ const ItemPurchase: React.FC = () => {
   const handleDeleteAll = async () => {
     Notific.confirm('ທ່ານຕ້ອງການລົບຂໍ້ມູນນີ້ແທ້ບໍ່?', async () => {
       try {
-        const resault = await axios.delete(`${api}/cartimport/All/${userId}?status=1`, {
+        const resault = await deleteApi(`/cartimport/All/${userId}?status=1`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -191,7 +189,7 @@ const ItemPurchase: React.FC = () => {
 
       setLoading(true);
       try {
-        const response = await axios.post(`${api}/import/create`, { product: dataValue },
+        const response = await postApi(`/import/create`, { product: dataValue },
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -221,7 +219,7 @@ const ItemPurchase: React.FC = () => {
     setSearchsku((prev: any) => ({ ...prev, sku: value }));   // ✔ FIX
     if (value.length < 7) return;
     try {
-      const response = await axios.post(`${api}/cartimport/createbysku`,
+      const response = await postApi(`/cartimport/createbysku`,
         { ...searchsku, sku: value },                  // ✔ ส่ง sku ใหม่
         {
           headers: { Authorization: `Bearer ${token}` }
@@ -270,7 +268,7 @@ const handleSearchBarcode = async (value: string) => {
   };
 if(!payload.barcode || payload.barcode.length < 7) return;
   try {
-    const response = await axios.post(`${api}/cartimport/barcode`, payload, {
+    const response = await postApi(`/cartimport/barcode`, payload, {
       headers: { Authorization: `Bearer ${token}` },
     });
 

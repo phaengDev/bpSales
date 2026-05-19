@@ -11,8 +11,7 @@ import {
   Button,
 } from "rsuite";
 import { useToken } from "@/hooks/useToken";
-import { CONFIG } from "@/utils/Config";
-import axios from "axios";
+import { postApi } from "@/utils/Configs";
 import numeral from "numeral";
 import SearchIcon from "@rsuite/icons/Search";
 import { useBrand } from "@/utils/selectOption";
@@ -33,7 +32,6 @@ const ViewProductCatgory: React.FC<Props> = ({
   cartid,
   fetchData,
 }) => {
-  const api = CONFIG.URLAPI;
   const token = useToken();
   const shopid = getLocalStorageItem("shopid");
   const userid = getLocalStorageItem("user_uuid");
@@ -72,7 +70,7 @@ const ViewProductCatgory: React.FC<Props> = ({
   const fetchProduct = async () => {
     try {
       setLoading(true);
-      const res = await axios.post(api + `/product/sales`, searchTerm, {
+      const res = await postApi(`/product/sales`, searchTerm, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setItemData(res.data.data);
@@ -132,7 +130,7 @@ const ViewProductCatgory: React.FC<Props> = ({
     }
     try {
       setLoading(true);
-      const res = await axios.post(  api + `/cartimport/create`,payload,{
+      const res = await postApi(  `/cartimport/create`,payload,{
           headers: { Authorization: `Bearer ${token}` },
         }
       );
@@ -156,7 +154,7 @@ const ViewProductCatgory: React.FC<Props> = ({
       <Modal.Body>
         <Grid fluid className="mb-2">
           <Row className="show-grid">
-            <Col xs={12} sm={8} lg={6} xl={8}>
+            <Col span={{ xs: 12, sm: 8, lg: 6, xl: 8 }}>
               <label className="form-label">ຍີ່ຫໍ້ສິນຄ້າ</label>
               <SelectPicker
                 data={brand}
@@ -167,7 +165,7 @@ const ViewProductCatgory: React.FC<Props> = ({
                 block
               />
             </Col>
-            <Col xs={12}  sm={8} smPush={8} lg={6} lgPush={12} xl={8} xlPush={8}>
+            <Col span={{ xs: 12, sm: 8, lg: 6, xl: 8 }} push={{ sm: 8, lg: 12, xl: 8 }}>
               <label className="form-label">ຄົ້ນຫາຊື້ສິນຄ້າ</label>
               <InputGroup inside>
                 <InputGroup.Addon>

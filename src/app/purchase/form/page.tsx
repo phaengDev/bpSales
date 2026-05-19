@@ -5,8 +5,7 @@ import PageContainer from '@/components/PageContainer';
 import { InputPicker, Button, IconButton, CheckTreePicker, Grid, Row, Col, NumberInput, SelectPicker, Input, Loader } from 'rsuite';
 import { useCategory, useSupplier } from '@/utils/selectOption';
 import FormAddRole from './FormAddRole';
-import axios from 'axios';
-import { CONFIG } from '@/utils/Config';
+import { postApi, getApi, deleteApi } from '@/utils/Configs';
 import { useToken } from '@/hooks/useToken';
 import { getLocalStorageItem } from '@/utils/storage';
 import { Notific } from '@/utils/Notification';
@@ -44,7 +43,6 @@ interface DataValueItem {
 // }
 
 const FormPurchase: React.FC = () => {
-  const api = CONFIG.URLAPI;
   const token = useToken();
   const shopid = getLocalStorageItem("shopid");
   const userId = getLocalStorageItem('user_uuid');
@@ -91,7 +89,7 @@ const FormPurchase: React.FC = () => {
   const fetchCart = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(`${api}/cartimport/fetch/${userId}?status=2`, {
+      const response = await getApi(`/cartimport/fetch/${userId}?status=2`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -128,7 +126,7 @@ const FormPurchase: React.FC = () => {
   // -------------------- Delete Item --------------------
   const handleDelete = async (id: string) => {
     try {
-      const resault = await axios.delete(`${api}/cartimport/${id}`, {
+      const resault = await deleteApi(`/cartimport/${id}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -146,7 +144,7 @@ const FormPurchase: React.FC = () => {
   const handleDeleteAll = async () => {
     Notific.confirm('ທ່ານຕ້ອງການລົບຂໍ້ມູນນີ້ແທ້ບໍ່?', async () => {
       try {
-        const resault = await axios.delete(`${api}/cartimport/All/${userId}?status=1`, {
+        const resault = await deleteApi(`/cartimport/All/${userId}?status=1`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -204,7 +202,7 @@ const FormPurchase: React.FC = () => {
   const handleSubmitOrder = async () => {
     try {
       setLoadingOrder(true);
-      const resault = await axios.post(`${api}/purchase/create`, dataSelect, {
+      const resault = await postApi(`/purchase/create`, dataSelect, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -240,7 +238,7 @@ const FormPurchase: React.FC = () => {
   //   if (!values.shopid || !values.categorieid) return;
   //   setLoading(true);
   //   try {
-  //     const res = await axios.post(`${api}/product/search`, values, {
+  //     const res = await postApi(`/product/search`, values, {
   //       headers: { Authorization: `Bearer ${token}` },
   //     });
   //     if (res.status !== 200) throw new Error('Failed to fetch product data');

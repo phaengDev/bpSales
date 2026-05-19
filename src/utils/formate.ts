@@ -18,12 +18,16 @@ import type { DateRangePickerProps }  from 'rsuite';
 //   placement?: 'left' | 'right';
 // }
 
-export function toThousands(value: number | string | null | undefined): string {
-  if (value == null || value === '') return '0 ₭';
+export function toThousands(
+  value: number | string | null | undefined,
+  genus?: string | null
+): string {
+  const currency = genus ? ` ${genus}` : '';
+  if (value == null || value === '') return `0${currency}`;
 
   // แปลงเป็น string เพื่อใช้ regex ได้ทุกกรณี
   const str = String(value);
-  return str.replace(/\d{1,3}(?=(\d{3})+(\.\d*)?$)/g, '$&,') + ' ₭';
+  return str.replace(/\d{1,3}(?=(\d{3})+(\.\d*)?$)/g, '$&,') + currency;
 }
 
 

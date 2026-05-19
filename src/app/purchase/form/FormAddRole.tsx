@@ -1,11 +1,10 @@
 import numeral from "numeral";
 import React, { useEffect, useState } from "react";
 import { Modal, Button, Placeholder } from "rsuite";
-import { CONFIG } from "@/utils/Config";
+import { postApi, getApi } from "@/utils/Configs";
 import { useToken } from "@/hooks/useToken";
 import { Notific } from "@/utils/Notification";
 import { getLocalStorageItem } from "@/utils/storage";
-import axios from "axios";
 interface Props {
   open: boolean;
   onClose: () => void;
@@ -32,7 +31,6 @@ interface ParentItem {
 }
 
 const FormAddRole: React.FC<Props> = ({ open, onClose, reSponse, cartId }) => {
-  const api = CONFIG.URLAPI;
   const token = useToken();
 const userid = getLocalStorageItem("user_uuid");
   const [loading, setLoading] = useState<boolean>(false);
@@ -42,7 +40,7 @@ const userid = getLocalStorageItem("user_uuid");
     setLoading(true);
     if(!cartId || !token) return;
     try {
-      const res = await axios.get(`${api}/product/brand/category/${cartId}`, {
+      const res = await getApi(`/product/brand/category/${cartId}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         }
@@ -112,7 +110,7 @@ const userid = getLocalStorageItem("user_uuid");
     }
     try {
       setLoadingConfirm(true);
-      const res = await axios.post(  api + `/cartimport/create`,payload,{
+      const res = await postApi(  `/cartimport/create`,payload,{
           headers: { Authorization: `Bearer ${token}` },
         }
       );

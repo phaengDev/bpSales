@@ -1,29 +1,43 @@
 'use client'
 import React, { useState, useEffect } from 'react';
 import { Grid, Row, Col, Button, Placeholder } from 'rsuite';
-import axios from 'axios';
-import { CONFIG } from '@/utils/Config';
-import "../../styles/style.css";
+import { getApi } from '@/utils/Configs';
 import { useToken } from '@/hooks/useToken';
 import { Modal } from 'react-bootstrap';
 import numeral from 'numeral';
 import moment from 'moment';
 
-// import cssText from "@/styles/style.css?inline";
 interface Props {
     open?: boolean;
     onClose?: () => void;
     billid: number;
 }
 const BillSales: React.FC<Props> = ({ open, onClose, billid }) => {
-    const api = CONFIG.URLAPI;
     const token = useToken();
     const [data, setData] = useState<any>(null);
     const [loading, setLoading] = useState(true);
+    useEffect(() => {
+        if (!open) return;
+
+        const styleId = 'bill-sales-style';
+        if (!document.getElementById(styleId)) {
+            const link = document.createElement('link');
+            link.id = styleId;
+            link.rel = 'stylesheet';
+            link.href = '/styles/style.css';
+            document.head.appendChild(link);
+        }
+
+        return () => {
+            document.getElementById(styleId)?.remove();
+        };
+    }, [open]);
+
     const fetchDataList = async () => {
+        if (!token) return;
         setLoading(true);
         try {
-            const response = await axios.get(`${api}/billsale/${billid}`, {
+            const response = await getApi(`/billsale/${billid}`, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
@@ -191,10 +205,10 @@ const BillSales: React.FC<Props> = ({ open, onClose, billid }) => {
                 </>)}
                 <Grid fluid className='p-2'>
                     <Row>
-                        <Col xs={12} md={12} lg={12} className='text-center'>
+                        <Col span={{ xs: 12, md: 12, lg: 12 }} className='text-center'>
                             <Button size='lg' onClick={onClose} appearance="primary" color='red'>ຍົກເລີກ</Button>
                         </Col>
-                        <Col xs={12} md={12} lg={12} className='text-center'>
+                        <Col span={{ xs: 12, md: 12, lg: 12 }} className='text-center'>
                             <Button size='lg' onClick={handlePrint} appearance="primary" color='green'><i className="fa-solid fa-print me-2" /> ພີມບິນ</Button>
                         </Col>
                     </Row>

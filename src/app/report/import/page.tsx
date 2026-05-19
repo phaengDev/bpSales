@@ -10,13 +10,11 @@ import SearchIcon from '@rsuite/icons/Search';
 import { useCategory, useBrand } from '@/utils/selectOption';
 import numeral from 'numeral';
 import NextPages from '@/utils/NextPages';
-import { CONFIG } from '@/utils/Config';
+import { postApi } from '@/utils/Configs';
 import moment from 'moment';
-import axios from 'axios';
 import { usePage } from '@/utils/selectOption';
 import EditIcon from '@rsuite/icons/Edit';
-const importReport: React.FC = () => {
-    const api = CONFIG.URLAPI;
+const ImportReport: React.FC = () => {
     const shopid = getLocalStorageItem('shopid');
     const token = useToken();
 
@@ -41,7 +39,7 @@ const importReport: React.FC = () => {
     const fetchData = async () => {
         setIsLoading(true);
         try {
-            const response = await axios.post(`${api}/import/fetch?skip=${skip}&limit=${itemsPerPage}`, search, {
+            const response = await postApi(`/import/fetch?skip=${skip}&limit=${itemsPerPage}`, search, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
@@ -117,7 +115,7 @@ useEffect(() => {
             <h1 className="page-header fs-3">ລາຍງານການນຳເຂົ້າ </h1>
             <Grid fluid>
                 <Row>
-                    <Col xs={24} sm={8} md={6} lg={6} className='mb-2'>
+                    <Col span={{ xs: 24, sm: 8, md: 6, lg: 6 }} className='mb-2'>
                         <label htmlFor="" className='form-label'>ວັນທີນຳເຂົ້າ</label>
                         <DateRangePicker
                             ranges={setupDate}
@@ -135,33 +133,33 @@ useEffect(() => {
                             block
                         />
                     </Col>
-                    <Col xs={12} sm={8} md={6} lg={5} className='mb-2'>
+                    <Col span={{ xs: 12, sm: 8, md: 6, lg: 5 }} className='mb-2'>
                         <label htmlFor="" className='form-label'>ປະເພດສິນຄ້າ</label>
                         <SelectPicker data={dataCategory} value={search.categorieid} onChange={(e) => setSearch({ ...search, categorieid: e })} placeholder='ປະເພດສິນຄ້າ' block />
                     </Col>
-                    <Col xs={12} sm={8} md={6} lg={5} className='mb-2'>
+                    <Col span={{ xs: 12, sm: 8, md: 6, lg: 5 }} className='mb-2'>
                         <label htmlFor="" className='form-label'>ຍີ່ຫໍ້ສິນຄ້າ</label>
                         <SelectPicker data={dataBrand} value={search.brandid} onChange={(e) => setSearch({ ...search, brandid: e })} placeholder='ຍີ່ຫໍ້ສິນຄ້າ' block />
                     </Col>
-                    <Col xs={18} sm={8} md={6} lg={5} className='mb-2'>
+                    <Col span={{ xs: 18, sm: 8, md: 6, lg: 5 }} className='mb-2'>
                         <label htmlFor="" className='form-label'>ປະເພດນຳເຂົ້າ</label>
                         <SelectPicker data={types} value={search.types} onChange={(e) => setSearch({ ...search, types: e })} placeholder='ປະເພດນຳເຂົ້າ' block />
                     </Col>
-                    <Col xs={6} sm={3} md={2} lg={2}>
+                    <Col span={{ xs: 6, sm: 3, md: 2, lg: 2 }}>
                         <Button appearance="primary" onClick={fetchData} color='red' className='mt-4'>ຄົ້ນຫາ</Button>
                     </Col>
                 </Row>
             </Grid>
             <Grid fluid className='mb-1 mt-4'>
                 <Row className="show-grid">
-                    <Col xs={6} sm={8} md={8} lg={5} xl={4}>
+                    <Col span={{ xs: 6, sm: 8, md: 8, lg: 5, xl: 4 }}>
                         <HStack>
                             <label className='d-sm-block d-none'>ສະແດງ</label>
                             <InputPicker data={pages} value={itemsPerPage} onChange={(e) => setItemsPerPage(e)} />
                             <label className='d-sm-block d-none'>ລາຍການ</label>
                         </HStack>
                     </Col>
-                    <Col xs={10} xsPush={8} sm={8} smPush={8} lg={6} lgPush={13} xl={6} xlPush={14}>
+                    <Col span={{ xs: 10, sm: 8, lg: 6, xl: 6 }} push={{ xs: 8, sm: 8, lg: 13, xl: 14 }}>
                         <InputGroup inside>
                             <InputGroup.Addon><SearchIcon /></InputGroup.Addon>
                             <Input onChange={handleFilter} placeholder="ເລກທີ່ບິນ /ຊື່ລູກຄ້າ.." />
@@ -222,4 +220,4 @@ useEffect(() => {
     )
 }
 
-export default importReport
+export default ImportReport

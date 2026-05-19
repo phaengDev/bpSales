@@ -4,15 +4,13 @@ import Link from 'next/link';
 import PageContainer from '@/components/PageContainer';
 import { Grid, Row, Col, Input, InputGroup, HStack, InputPicker,Loader, Placeholder } from 'rsuite';
 import Formcartgory from './FormCartgory';
-import axios from 'axios';
-import { CONFIG } from '../../../utils/Config';
+import { getApi, deleteApi } from '../../../utils/Configs';
 import { usePage } from '../../../utils/selectOption';
 import NextPages from '../../../utils/NextPages';
 import { Notific } from '../../../utils/Notification';
 import { useToken } from '@/hooks/useToken';
 import { getLocalStorageItem } from '@/utils/storage';
 const CategoryPage: React.FC = ()=> {
-    const api = CONFIG.URLAPI;
     const shopid = getLocalStorageItem('shopid');
     const token = useToken();
 
@@ -38,12 +36,12 @@ const CategoryPage: React.FC = ()=> {
     const fetchCategories = async () => {
         try {
             setIsLoading(true);
-            const response = await fetch(`${api}/category/fetch/${shopid}?skip=${skipItem}&limit=${itemsPerPage}`, {
+            const response = await getApi(`/category/fetch/${shopid}?skip=${skipItem}&limit=${itemsPerPage}`, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 }
             });
-            const jsonData = await response.json();
+            const jsonData = response.data;
             setItemData(jsonData.data);
             setFilter(jsonData.data);
             setTotalItems(jsonData.total)
@@ -69,7 +67,7 @@ const CategoryPage: React.FC = ()=> {
     const handleDelete = async (id: any) => {
         Notific.confirm('ທ່ານຕ້ອງການລົບຂໍ້ມູນນີ້ແທ້ບໍ່?', async () => {
             try {
-                const response = await axios.delete(api + '/category/' + btoa(id), {
+                const response = await deleteApi('/category/' + btoa(id), {
                     headers: {
                         Authorization: `Bearer ${token}`,
                     }
@@ -112,13 +110,13 @@ const CategoryPage: React.FC = ()=> {
                 <div className="panel-body p-0">
                     <Grid fluid>
                         <Row className="show-grid">
-                            <Col xs={6} sm={5} lg={3}>
+                            <Col span={{ xs: 6, sm: 5, lg: 3 }}>
                                 <HStack>
                                     <label htmlFor="" >ສະແດງ</label>
                                     <InputPicker value={itemsPerPage} onChange={(e) => setItemsPerPage(e)} data={pages} />
                                 </HStack>
                             </Col>
-                            <Col xs={14} xsPush={4} sm={10} smPush={9} md={10} mdPush={9} lg={6} lgPush={15}>
+                            <Col span={{ xs: 14, sm: 10, md: 10, lg: 6 }} push={{ xs: 4, sm: 9, md: 9, lg: 15 }}>
                                 <InputGroup inside>
                                     <InputGroup.Addon><i className="fa fa-search" /></InputGroup.Addon>
                                     <Input placeholder="ຄົ້ນຫາ ..." onChange={(e) => handleFilter(e)} />

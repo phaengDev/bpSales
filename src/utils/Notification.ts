@@ -1,6 +1,5 @@
 'use client'
 // import AWN from "awesome-notifications";
-import 'awesome-notifications/dist/style.css'
 import Swal from 'sweetalert2';
 
 let AWN: any
@@ -106,4 +105,3 @@ interface Notification {
         });
       },
     };
-    

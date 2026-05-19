@@ -4,15 +4,13 @@ import Link from 'next/link';
 import PageContainer from '@/components/PageContainer';
 import { Grid, Row, Col, Input, InputGroup,HStack, InputPicker,Placeholder, Loader } from 'rsuite';
 import FormBrand from './FormBrand';
-import axios from 'axios';
-import { CONFIG } from  '../../../utils/Config';
+import { postApi, deleteApi } from '../../../utils/Configs';
 import { usePage } from '../../../utils/selectOption';
 import NextPages from '../../../utils/NextPages';
 import { Notific } from '../../../utils/Notification';
 import { useToken } from '@/hooks/useToken';
 import { getLocalStorageItem } from '@/utils/storage';
 const BrandPage: React.FC = () =>{
-  const api = CONFIG.URLAPI;
   const shopid = getLocalStorageItem('shopid');
   const token = useToken();
   const [open, setOpen] = useState(false);
@@ -29,7 +27,7 @@ const BrandPage: React.FC = () =>{
   const handleDelete = (id: string) => {
     Notific.confirm('ທ່ານຕ້ອງການລົບຂໍ້ມູນນີ້ແທ້ບໍ່?', async () => {
       try {
-        const response = await axios.delete(api + '/brand/' + btoa(id),
+        const response = await deleteApi('/brand/' + btoa(id),
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -63,7 +61,7 @@ const [search, setSearch] = useState({
   const fetchBrands = async () => {
     try {
       setIsLoading(true);
-      const response = await axios.post(`${api}/brand/fetch?skip=${skipItem}&limit=${itemsPerPage}`,search, {
+      const response = await postApi(`/brand/fetch?skip=${skipItem}&limit=${itemsPerPage}`,search, {
         headers: {
           Authorization: `Bearer ${token}`,
         }
@@ -120,14 +118,14 @@ const [search, setSearch] = useState({
         <div className="panel-body p-0">
           <Grid fluid>
             <Row className="show-grid">
-            <Col xs={6} sm={8} md={8} lg={5} xl={4}>
+            <Col span={{ xs: 6, sm: 8, md: 8, lg: 5, xl: 4 }}>
               <HStack>
                  <label className='d-sm-block d-none'>ສະແດງ</label>
                   <InputPicker value={itemsPerPage} onChange={(e)=>setItemsPerPage(e)}  data={pages} />
                   <label className='d-sm-block d-none'>ລາຍການ</label>
               </HStack>
               </Col>
-              <Col xs={10} xsPush={8} sm={8} smPush={8} lg={6} lgPush={13} xl={6} xlPush={14}>
+              <Col span={{ xs: 10, sm: 8, lg: 6, xl: 6 }} push={{ xs: 8, sm: 8, lg: 13, xl: 14 }}>
                 <InputGroup inside>
                   <InputGroup.Addon><i className="fa fa-search" /></InputGroup.Addon>
                   <Input onChange={handleFilter} placeholder="ຄົ້ນຫາ ..." />

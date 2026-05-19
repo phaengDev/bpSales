@@ -1,8 +1,7 @@
 'use client'
 import React, { useState, useEffect } from 'react'
 import PageContainer from '@/components/PageContainer';
-import { CONFIG } from '@/utils/Config';
-import axios from 'axios';
+import { postApi } from '@/utils/Configs';
 import { useToken } from '@/hooks/useToken';
 import { getLocalStorageItem } from '@/utils/storage';
 import { useCategory, useUnite, useSizes, usePage } from '@/utils/selectOption';
@@ -13,7 +12,6 @@ import NextPages from '@/utils/NextPages';
 import moment from 'moment';
 import Link from 'next/link';
 const SaleList: React.FC = () => {
-    const api = CONFIG.URLAPI;
     const shopId = getLocalStorageItem('shopid');
     const token = useToken();
     const cartgory = useCategory();
@@ -39,7 +37,7 @@ const SaleList: React.FC = () => {
     const fetchSales = async () => {
         setIsLoading(true);
         try {
-            const response = await axios.post(api + '/billsale/fetch/list?skip=' + skipItem + '&limit=' + itemsPerPage, search, {
+            const response = await postApi('/billsale/fetch/list?skip=' + skipItem + '&limit=' + itemsPerPage, search, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
@@ -112,40 +110,40 @@ const SaleList: React.FC = () => {
             <h1 className="page-header">ລາຍງານການຂາຍທັງໝົດ</h1>
             <Grid fluid className="row mb-2">
                 <Row>
-                    <Col xs={12} sm={12} md={6} lg={5} className='mb-3'>
+                    <Col span={{ xs: 12, sm: 12, md: 6, lg: 5 }} className='mb-3'>
                         <label className="form-label">ວັນທີຂາຍ</label>
                         <DatePicker oneTap value={search.startDate} onChange={value => setSearch({ ...search, startDate: value })} format="dd/MM/yyyy" block />
                     </Col>
-                    <Col xs={12} sm={12} md={6} lg={5} className='mb-3'>
+                    <Col span={{ xs: 12, sm: 12, md: 6, lg: 5 }} className='mb-3'>
                         <label className="form-label">ຫາວັນທີ</label>
                         <DatePicker oneTap value={search.endDate} onChange={value => setSearch({ ...search, endDate: value })} format="dd/MM/yyyy" block />
                     </Col>
 
-                    <Col xs={12} sm={8} md={7} lg={5} className='mb-3'>
+                    <Col span={{ xs: 12, sm: 8, md: 7, lg: 5 }} className='mb-3'>
                         <label className="form-label">ປະເພດສິນຄ້າ</label>
                         <SelectPicker data={cartgory} value={search.cartgoryid} onChange={value => setSearch({ ...search, cartgoryid: value })} placeholder="ປະເພດສິນຄ້າ" block />
                     </Col>
-                    <Col xs={12} sm={7} md={5} lg={4} className='mb-3'>
+                    <Col span={{ xs: 12, sm: 7, md: 5, lg: 4 }} className='mb-3'>
                         <label className="form-label">ຫົວໜວຍ</label>
                         <SelectPicker data={unit} value={search.uniteid} onChange={value => setSearch({ ...search, uniteid: value })} placeholder="ຫົວໜວຍ" block />
                     </Col>
-                    <Col xs={12} sm={7} md={5} lg={4} className='mb-3'>
+                    <Col span={{ xs: 12, sm: 7, md: 5, lg: 4 }} className='mb-3'>
                         <label className="form-label">ໄຊ້ Size</label>
                         <SelectPicker data={size} value={search.sizeid} onChange={value => setSearch({ ...search, sizeid: value })} placeholder="ໄຊ້ Size" block />
                     </Col>
-                    <Col xs={2} sm={2} md={2} lg={1} className='mb-3'>
+                    <Col span={{ xs: 2, sm: 2, md: 2, lg: 1 }} className='mb-3'>
                         <Button appearance="primary" onClick={fetchSales} color='red' className='mt-4'>ຄົ້ນຫາ</Button>
                     </Col>
                 </Row>
                 <Row className="show-grid">
-                    <Col xs={6} sm={8} md={8} lg={5} xl={4}>
+                    <Col span={{ xs: 6, sm: 8, md: 8, lg: 5, xl: 4 }}>
                         <HStack>
                             <label className='d-sm-block d-none'>ສະແດງ</label>
                             <InputPicker data={pages} value={itemsPerPage} onChange={(e) => setItemsPerPage(e)} />
                             <label className='d-sm-block d-none'>ລາຍການ</label>
                         </HStack>
                     </Col>
-                    <Col xs={10} xsPush={8} sm={8} smPush={8} lg={6} lgPush={13} xl={6} xlPush={14}>
+                    <Col span={{ xs: 10, sm: 8, lg: 6, xl: 6 }} push={{ xs: 8, sm: 8, lg: 13, xl: 14 }}>
                         <InputGroup inside>
                             <InputGroup.Addon><SearchIcon /></InputGroup.Addon>
                             <Input onChange={handleFilter} placeholder="ເລກທີ່ບິນ /ຊື່ລູກຄ້າ.." />

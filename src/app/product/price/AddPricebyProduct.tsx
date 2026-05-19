@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Modal, Button, NumberInput, Input } from 'rsuite';
 import { Notific } from '@/utils/Notification';
-import { CONFIG } from '@/utils/Config';
-import axios from 'axios';
+import { postApi, putApi } from '@/utils/Configs';
 import { useToken } from '@/hooks/useToken';
 import numeral from 'numeral';
 import {toThousands} from '@/utils/formate';
@@ -14,7 +13,6 @@ interface Props {
     dataMain: any
 }
 const AddPricebyProduct: React.FC<Props> = ({ open, handleClose, data, resPonse, dataMain }) => {
-    const api = CONFIG.URLAPI;
     const token = useToken();
     const main = dataMain;
     const [inputs, setInputs] = useState<any>({
@@ -28,7 +26,7 @@ const AddPricebyProduct: React.FC<Props> = ({ open, handleClose, data, resPonse,
         setLoading(true);
         try {
             if (data) {
-                const res = await axios.put(api + `/price/${btoa(data.price_uuid)}`, inputs, {
+                const res = await putApi(`/price/${btoa(data.price_uuid)}`, inputs, {
                     headers: {
                         Authorization: `Bearer ${token}`,
                     }
@@ -39,7 +37,7 @@ const AddPricebyProduct: React.FC<Props> = ({ open, handleClose, data, resPonse,
                     resPonse(res.data.data);
                 }
             } else {
-                const res = await axios.post(api + '/price/create/one', inputs, {
+                const res = await postApi('/price/create/one', inputs, {
                     headers: {
                         Authorization: `Bearer ${token}`,
                     }

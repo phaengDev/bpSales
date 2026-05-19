@@ -1,5 +1,6 @@
 import './globals.css'
 import 'rsuite/dist/rsuite-no-reset.min.css';
+import 'awesome-notifications/dist/style.css';
 import type { Metadata } from 'next'
 import ClientOnlyScripts from '@/components/ClientOnlyScripts'
 

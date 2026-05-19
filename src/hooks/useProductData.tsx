@@ -1,10 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { CONFIG } from '@/utils/Config';
+import { getApi } from '@/utils/Configs';
 import { useToken } from '@/hooks/useToken';
-import axios from 'axios';
-
 // ==== Type Definitions ====
 export interface ProductItem {
     label: string;
@@ -21,7 +19,6 @@ export interface CategoryTree {
 
 // ==== Hook ====
 export const useProductData = (categoryId: string | number | null) => {
-    const api = CONFIG.URLAPI;
     const token = useToken();
 
     const [treeData, setTreeData] = useState<CategoryTree[]>([]);
@@ -34,8 +31,8 @@ export const useProductData = (categoryId: string | number | null) => {
         const fetchProducts = async () => {
             setLoading(true);
             try {
-                const res = await axios.get(
-                    `${api}/product/brand/category/${categoryId}`,
+                const res = await getApi(
+                    `/product/brand/category/${categoryId}`,
                     { headers: { Authorization: `Bearer ${token}` } }
                 );
 

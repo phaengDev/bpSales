@@ -3,10 +3,9 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import moment from "moment";
-import axios from "axios";
 import numeral from "numeral";
 import { Input, InputGroup, NumberInput, IconButton, Button } from "rsuite";
-import { CONFIG } from "@/utils/Config";
+import { postApi } from "@/utils/Configs";
 import { Notific } from "@/utils/Notification";
 import FormSearch from "./FormSearch";
 import { useToken } from "@/hooks/useToken";
@@ -26,7 +25,6 @@ interface OrderItem {
 }
 
 export default function FormPurchase() {
-  const api = CONFIG.URLAPI;
   const router = useRouter();
   const logos = '../../assets/img/icon/user.png';
   const userName = getLocalStorageItem("userName");
@@ -50,6 +48,27 @@ export default function FormPurchase() {
     userName,
     itemProduct: [],
   });
+
+  // --------------------------------------------------
+  // CALCULATE TOTALS
+  // --------------------------------------------------
+  function calcTotals(items: OrderItem[], map: any) {
+    const selected = items.filter((i) => map[i._uuid]);
+    const t = selected.reduce(
+      (sum, x) => sum + x.prices_order * x.qty_order - x.discount,
+      0
+    );
+    const dis = selected.reduce((sum, x) => sum + x.discount, 0);
+
+    setTotal(t);
+    setTotalDiscount(dis);
+    setValues((prev: any) => ({
+      ...prev,
+      actual_balance: t + dis,
+      discount: dis,
+      total_orders: t,
+    }));
+  }
 
   // --------------------------------------------------
   // INITIALIZE ROWS WHEN ORDER CHANGES
@@ -89,27 +108,6 @@ export default function FormPurchase() {
     // 3) calculate totals
     calcTotals(items, checkInit);
   }, [order]);
-  // --------------------------------------------------
-  // CALCULATE TOTALS
-  // --------------------------------------------------
-  const calcTotals = (items: OrderItem[], map: any) => {
-    const selected = items.filter((i) => map[i._uuid]);
-    const t = selected.reduce(
-      (sum, x) => sum + x.prices_order * x.qty_order - x.discount,
-      0
-    );
-    const dis = selected.reduce((sum, x) => sum + x.discount, 0);
-
-    setTotal(t);
-    setTotalDiscount(dis);
-    setValues((prev: any) => ({
-      ...prev,
-      actual_balance: t + dis,
-      discount: dis,
-      total_orders: t,
-    }));
-  };
-
   // --------------------------------------------------
   // HANDLE CHANGE (qty, price, discount)
   // --------------------------------------------------
@@ -157,7 +155,7 @@ export default function FormPurchase() {
   // --------------------------------------------------
   const handleSave = async () => {
     try {
-      const res = await axios.post(`${api}/import/importPurchase`, values,{
+      const res = await postApi(`/import/importPurchase`, values,{
         headers: {
                         Authorization: `Bearer ${token}`,
                     }

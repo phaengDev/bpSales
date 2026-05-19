@@ -2,8 +2,7 @@
 import React, { useState, useEffect } from 'react'
 import { Modal, Button, Input } from 'rsuite';
 import { Notific } from '../../../utils/Notification';
-import axios from 'axios';
-import { CONFIG } from '../../../utils/Config';
+import { postApi, putApi } from '../../../utils/Configs';
 import { useToken } from '@/hooks/useToken';
 import { getLocalStorageItem } from '@/utils/storage';
 interface Props {
@@ -13,7 +12,6 @@ interface Props {
     fetchData: (data: any) => void;
 }
 const FormSize: React.FC<Props> = ({ open, handleClose, data, fetchData }) => {
-    const api = CONFIG.URLAPI;
     const shopid = getLocalStorageItem('shopid');
     const token = useToken();
     const [values, setValues] = useState<any>({
@@ -26,7 +24,7 @@ const FormSize: React.FC<Props> = ({ open, handleClose, data, fetchData }) => {
         setLoading(true);
         try {
             if (data) {
-                const result = await axios.put(api + `/size/${btoa(data.size_uuid)}`, values, {
+                const result = await putApi(`/size/${btoa(data.size_uuid)}`, values, {
                     headers: {
                         Authorization: `Bearer ${token}`,
                     },
@@ -37,7 +35,7 @@ const FormSize: React.FC<Props> = ({ open, handleClose, data, fetchData }) => {
                     fetchData(result.data.data);
                 }
             } else {
-                const result = await axios.post(api + '/size/create', values, {
+                const result = await postApi('/size/create', values, {
                     headers: {
                         Authorization: `Bearer ${token}`,
                     },

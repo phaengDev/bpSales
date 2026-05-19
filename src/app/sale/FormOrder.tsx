@@ -2,10 +2,9 @@
 import React, { useState } from 'react';
 import {Loader} from 'rsuite';
 import Modal from 'react-bootstrap/Modal';
-import { CONFIG } from '@/utils/Config';
+import { postApi } from '@/utils/Configs';
 import numeral from 'numeral';
 import { Notific } from '@/utils/Notification';
-import axios from 'axios';
 import { useToken } from '@/hooks/useToken';
 import { getLocalStorageItem } from '@/utils/storage';
 interface Props {
@@ -15,7 +14,6 @@ interface Props {
     fetchOrder: (data: any) => void;
 }
 const FormOrder: React.FC<Props> = ({ open, handleClose, data, fetchOrder }) => {
-    const api = CONFIG.URLAPI;
     const token = useToken();
     const userid=getLocalStorageItem('user_uuid');
     const images = '@/assets/img/icon/picture.jpg';
@@ -59,7 +57,7 @@ const [loading, setLoading] = useState(false);
     const handleAddOrder = async () => {
         setLoading(true);
         try {
-            const response = await axios.post(api + '/order/create', values,
+            const response = await postApi('/order/create', values,
                 {
                     headers: {
                         Authorization: `Bearer ${token}`

@@ -4,8 +4,7 @@ import { Modal, Button, Input, InputGroup, Loader, InputPicker } from 'rsuite';
 import EyeCloseIcon from '@rsuite/icons/EyeClose';
 import VisibleIcon from '@rsuite/icons/Visible';
 import PhoneFillIcon from '@rsuite/icons/PhoneFill';
-import axios from 'axios';
-import { CONFIG } from '../../utils/Config';
+import { postApi, putApi } from '../../utils/Configs';
 import { Notific } from '../../utils/Notification';
 import { useToken } from '@/hooks/useToken';
 import { getLocalStorageItem } from '@/utils/storage';
@@ -16,7 +15,6 @@ interface Props {
     resPonse: (data: any) => void;
 }
 const FormAdd: React.FC<Props> = ({ open, handleClose, data, resPonse }) => {
-    const api = CONFIG.URLAPI;
     const token = useToken();
     const shopid = getLocalStorageItem('shopid') || null;
     
@@ -41,7 +39,7 @@ const FormAdd: React.FC<Props> = ({ open, handleClose, data, resPonse }) => {
         setLoading(true);
         try {
             if (data) {
-                const response = await axios.put(`${api}/user/${btoa(data.user_uuid)}`, values, {
+                const response = await putApi(`/user/${btoa(data.user_uuid)}`, values, {
                     headers: {
                         Authorization: `Bearer ${token}`,
                     }
@@ -52,7 +50,7 @@ const FormAdd: React.FC<Props> = ({ open, handleClose, data, resPonse }) => {
                     Notific.success(response.data.message);
                 }
             } else {
-                const response = await axios.post(`${api}/user/create`, values, {
+                const response = await postApi(`/user/create`, values, {
                     headers: {
                         Authorization: `Bearer ${token}`,
                     }

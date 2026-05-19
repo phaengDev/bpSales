@@ -2,9 +2,8 @@
 import React, { useState, useEffect } from 'react'
 import { Modal } from 'react-bootstrap';
 import { IconButton } from 'rsuite';
-import {CONFIG } from  '../../utils/Config';
+import { postApi } from '../../utils/Configs';
 import WarningRoundIcon from '@rsuite/icons/WarningRound';
-import axios from 'axios';
 import { Notific } from '../../utils/Notification';
 import { useToken } from '@/hooks/useToken';
 interface Props {
@@ -14,7 +13,6 @@ interface Props {
     resPonse: (data: any) => void
 }
 const ViewImage: React.FC<Props> = ({ show, handleClose, item ,resPonse}) =>{
-    const api = CONFIG.URLAPI;
     const token = useToken();
     const imgPs = `${item.image === '' || item.image === null ? '../assets/img/icon/picture.jpg' : item.url}`
 
@@ -41,7 +39,7 @@ const ViewImage: React.FC<Props> = ({ show, handleClose, item ,resPonse}) =>{
 
     const handleEditFile = async () => {
         try {
-            const result = await axios.post(api + '/product/editImg', values, {
+            const result = await postApi('/product/editImg', values, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                     "Content-Type": "multipart/form-data",

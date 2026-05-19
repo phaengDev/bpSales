@@ -4,8 +4,7 @@ import { Modal, Button, SelectPicker, Input, IconButton, NumberInput, Loader } f
 import PlusRoundIcon from '@rsuite/icons/PlusRound';
 import MinusRoundIcon from '@rsuite/icons/MinusRound';
 import { useCategory } from '@/utils/selectOption';
-import { CONFIG } from '@/utils/Config';
-import axios from 'axios';
+import { postApi } from '@/utils/Configs';
 import { Notific } from '@/utils/Notification';
 import numeral from 'numeral';
 import { useToken } from '@/hooks/useToken';
@@ -17,7 +16,6 @@ interface Props {
   resPonse: (data: any) => void
 }
 const FormAdd: React.FC<Props> = ({ show, handleClose, item , resPonse}) => {
-  const api = CONFIG.URLAPI;
   const token = useToken();
   const categories = useCategory();
 
@@ -73,7 +71,7 @@ const [isLoading, setIsLoading] = useState(false);
         ...dataValue,
         dataPrices: rows,
       };
-      const response = await axios.post(api + '/price/create/mt', dataForm, {
+      const response = await postApi('/price/create/mt', dataForm, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -121,7 +119,6 @@ const [isLoading, setIsLoading] = useState(false);
         {priceMain > 0 && (
           <h4 className='mt-3 text-red'>ລາຄາຂາຍປົກະຕິ: {priceMain ? numeral(priceMain).format('0,0.00') : "-"} ₭</h4>
         )}
-
         <hr />
         <table className='w-100 table table-sm mt-3'>
           <tbody>

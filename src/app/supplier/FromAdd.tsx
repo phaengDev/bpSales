@@ -3,10 +3,9 @@ import React, { useState, useEffect } from 'react';
 import { Modal, Button, Input, SelectPicker, InputGroup, IconButton } from 'rsuite';
 import WarningRoundIcon from '@rsuite/icons/WarningRound';
 import PhoneFillIcon from '@rsuite/icons/PhoneFill';
-import axios from 'axios';
-import { CONFIG } from '../../utils/Config';
+import { postApi, putApi } from '../../utils/Configs';
 import { Notific } from '../../utils/Notification';
-import { getCountry } from '../../utils/selectOption';
+import { useCountry } from '../../utils/selectOption';
 import { useToken } from '@/hooks/useToken';
 import { getLocalStorageItem } from '@/utils/storage';
 interface Props {
@@ -16,10 +15,9 @@ interface Props {
     reSponse: (data: any) => void
 }
 const FromAdd: React.FC<Props> = ({ open, onClose, data, reSponse }) => {
-    const api = CONFIG.URLAPI;
     const token = useToken();
     const shopid = getLocalStorageItem('shopid');
-    const country = getCountry();
+    const country = useCountry();
 
     const [values, setValues] = useState<any>({
         shopid: shopid,
@@ -69,7 +67,7 @@ const FromAdd: React.FC<Props> = ({ open, onClose, data, reSponse }) => {
         setLoading(true);
         try {
         if(data){
-            const result = await axios.put(api + `/supplier/${btoa(data._uuid)}`, values, {
+            const result = await putApi(`/supplier/${btoa(data._uuid)}`, values, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                     "Content-Type": "multipart/form-data",
@@ -81,7 +79,7 @@ const FromAdd: React.FC<Props> = ({ open, onClose, data, reSponse }) => {
                 reSponse(result.data.data);
             }
         }else{
-            const result = await axios.post(api + '/supplier/create', values, {
+            const result = await postApi('/supplier/create', values, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                     "Content-Type": "multipart/form-data",

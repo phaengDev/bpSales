@@ -1,11 +1,9 @@
 'use client'
 import React, { useState } from 'react'
 import { Loader } from 'rsuite';
-import axios from 'axios';
-import { CONFIG } from '../../utils/Config';
+import { postApi } from '../../utils/Configs';
 import { Notific } from '../../utils/Notification';
 const Login: React.FC = () => {
-    const api = CONFIG.URLAPI;
     const [inputs, setInputs] = useState<any>({
         phones: '',
         password: ''
@@ -24,7 +22,7 @@ const Login: React.FC = () => {
         e.preventDefault();
         setIsLoading(true);
         try {
-            const resp = await axios.post(api + '/auth/login', inputs);
+            const resp = await postApi('/auth/login', inputs);
             if (resp.status === 200) {
                 const {  user_uuid,shopid,shopName, userName, phones, created, updated, deleted} = resp.data.user;
                 localStorage.setItem('token', resp.data.token);

@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { Modal, Button, Input, Radio, RadioGroup } from 'rsuite';
 import { Notific } from '../../../utils/Notification';
-import axios from 'axios';
-import { CONFIG } from  '../../../utils/Config';
+import { postApi, putApi } from '../../../utils/Configs';
 import { useToken } from '@/hooks/useToken';
 import { getLocalStorageItem } from '@/utils/storage';
 interface Props {
@@ -12,7 +11,6 @@ interface Props {
     fetchData: (data: any) => void;
 }
 const FormUnit: React.FC<Props> = ({ open, handleClose, data,fetchData })=> {
-    const api = CONFIG.URLAPI;
     const shopid = getLocalStorageItem('shopid');
     const token = useToken();
     const [values, setValues] = useState<any>({
@@ -27,7 +25,7 @@ const [loading, setLoading] = useState(false);
            setLoading(true);
            try {
             if (data) {
-                const result = await axios.put(api + `/unit/${btoa(data.unit_uuid)}`, values, {
+                const result = await putApi(`/unit/${btoa(data.unit_uuid)}`, values, {
                     headers: {
                         Authorization: `Bearer ${token}`,
                     },
@@ -38,7 +36,7 @@ const [loading, setLoading] = useState(false);
                     fetchData(result.data.data);
                 }
             }else{
-            const result = await axios.post(api + '/unit/create', values, {
+            const result = await postApi('/unit/create', values, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },

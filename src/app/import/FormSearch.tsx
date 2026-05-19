@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { Modal, Button, Input, Image, InputGroup, Notification, Loader } from 'rsuite'
-import { CONFIG } from '@/utils/Config';
+import { postApi } from '@/utils/Configs';
 import SearchIcon from '@rsuite/icons/Search';
-import axios from 'axios';
 import { useToken } from '@/hooks/useToken';
 import { getLocalStorageItem } from '@/utils/storage';
 interface Props {
@@ -11,7 +10,6 @@ interface Props {
     resPonse: (data: any) => void
 }
 const FormSearch: React.FC<Props> = ({ open, handleClose, resPonse }) =>{
-    const api = CONFIG.URLAPI;
     const shopId = getLocalStorageItem('shopid');
     const token = useToken();
 
@@ -26,7 +24,7 @@ const FormSearch: React.FC<Props> = ({ open, handleClose, resPonse }) =>{
         if(!token || !shopId) return
         setLoading(true);
         try {
-            const response = await axios.post(api + `/purchase/search`, search,{
+            const response = await postApi(`/purchase/search`, search,{
                 headers: {
                     Authorization: `Bearer ${token}`,
                 }

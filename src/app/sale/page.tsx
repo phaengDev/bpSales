@@ -4,8 +4,7 @@ import Link from 'next/link';
 import { Input, InputGroup, IconButton, Grid, Row, Col, Placeholder, Loader, Box, Badge } from 'rsuite';
 import FormPaySales from './FormPaySales';
 import FormOrder from './FormOrder';
-import { CONFIG } from '../../utils/Config';
-import axios from 'axios';
+import { postApi, getApi, putApi, deleteApi } from '../../utils/Configs';
 import { useCategory } from '../../utils/selectOption';
 import numeral from 'numeral';
 import { useToken } from '@/hooks/useToken';
@@ -13,7 +12,7 @@ import { getLocalStorageItem } from '@/utils/storage';
 import BillSales from './billSales';
 import Payonline from './Payonline';
 import EditIcon from '@rsuite/icons/Edit';
-// import SearchIcon from '@rsuite/icons/Search';
+import FromSearch from '../cancel/FromSearch';
 import { Notific } from '@/utils/Notification';
 import ViewPrice from './ViewPrice';
 interface Product {
@@ -40,7 +39,6 @@ interface Product {
 //     images: string | null
 // }
 const SalesPage: React.FC = () => {
-    const api = CONFIG.URLAPI;
     const images = '@/assets/img/icon/picture.jpg';
     const token = useToken();
     const shopsId = getLocalStorageItem('shopid');
@@ -98,7 +96,7 @@ const SalesPage: React.FC = () => {
         if (!token || !shopsId) return;
         try {
             setIsLoading(true);
-            const response = await axios.post(`${api}/product/sales?skip=${offset}&limit=${itemsPerPage}`, values,
+            const response = await postApi(`/product/sales?skip=${offset}&limit=${itemsPerPage}`, values,
                 {
                     headers: {
                         Authorization: `Bearer ${token}`,
@@ -174,7 +172,7 @@ const SalesPage: React.FC = () => {
             return;
         }
         try {
-            const response = await axios.post(`${api}/order/getsale`, search,
+            const response = await postApi(`/order/getsale`, search,
                 {
                     headers: {
                         Authorization: `Bearer ${token}`
@@ -213,7 +211,7 @@ const SalesPage: React.FC = () => {
     const fetchOrder = async () => {
         if (!shopsId || !token) return;
         try {
-            const response = await axios.get(`${api}/order/fetch/${userid}`, {
+            const response = await getApi(`/order/fetch/${userid}`, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
@@ -236,7 +234,7 @@ const SalesPage: React.FC = () => {
     // =============================== PLUS CART ==============================
     const handlePlus = async (id: string) => {
         try {
-            const response = await axios.put(api + '/order/plus/' + btoa(id), {}, {
+            const response = await putApi('/order/plus/' + btoa(id), {}, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 }
@@ -251,7 +249,7 @@ const SalesPage: React.FC = () => {
     // ================================ MINUS CART ==============================
     const handleMinus = async (id: string) => {
         try {
-            const response = await axios.put(api + '/order/minus/' + btoa(id), {}, {
+            const response = await putApi('/order/minus/' + btoa(id), {}, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 }
@@ -266,7 +264,7 @@ const SalesPage: React.FC = () => {
     // =============================== DELETE CART ==============================
     const handleDelete = async (id: string) => {
         try {
-            const response = await axios.delete(api + '/order/' + btoa(id), {
+            const response = await deleteApi('/order/' + btoa(id), {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 }
@@ -330,6 +328,12 @@ const SalesPage: React.FC = () => {
     const viewPrice = async(data:any)=>{
         setPrice(data);
         setOpenPrice(true);
+    }
+
+    // ============ search Cancel Sale====
+    const [openCancel, setOpenCancel] = useState(false);
+    const searchCancelSale = () => {
+        setOpenCancel(true);
     }
     return (
         <div id="app" className="app app-content-full-height app-without-sidebar app-without-header" >
@@ -563,7 +567,7 @@ const SalesPage: React.FC = () => {
                                     <div className="flex-1 text-end h4 mb-0">{numeral(sumTotal).format('0,0')}</div>
                                 </div>
                                 <div className="d-flex align-items-center mt-3">
-                                    <button type='button' onClick={printBill} className="btn btn-default rounded-3 text-center me-10px w-70px"  >
+                                    <button type='button' onClick={searchCancelSale} className="btn btn-default rounded-3 text-center me-10px w-70px"  >
                                         <i className="fa-solid fa-notes-medical fs-18px"></i> ຍົກເລີກ
                                     </button>
                                     <button type='button' onClick={handlePayonline} className="btn btn-orange rounded-3 text-center me-10px w-70px" >
@@ -607,6 +611,10 @@ const SalesPage: React.FC = () => {
             }
             {openPrice && 
             <ViewPrice open={openPrice} onClose={()=>setOpenPrice(false)} data={price} resPonse={setResponse} />
+            }
+
+            {openCancel &&
+                <FromSearch open={openCancel} onClose={() => setOpenCancel(false)}  />
             }
         </div>
 

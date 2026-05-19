@@ -4,12 +4,12 @@ import Modal from 'react-bootstrap/Modal';
 import { InputGroup, Input, NumberInput, Button, Whisper, Popover, RadioGroup, Radio, Grid, Row, Col, Stat, Loader, Textarea, Toggle } from 'rsuite';
 // import SearchIcon from '@rsuite/icons/Search';
 import numeral from 'numeral';
-import axios from 'axios';
-import { CONFIG } from '../../utils/Config';
+import { postApi } from '../../utils/Configs';
 import { Notific } from '../../utils/Notification';
 import { useToken } from '@/hooks/useToken';
 import { getLocalStorageItem } from '@/utils/storage';
-import { getCountry } from '@/utils/selectOption';
+import { useCountry } from '@/utils/selectOption';
+import { toThousands } from '@/utils/formate';
 interface Props {
     open: boolean;
     handleClose: () => void;
@@ -18,26 +18,10 @@ interface Props {
     billId: (data: any) => void
 }
 const FormPaySales: React.FC<Props> = ({ open, handleClose, data, reSpons, billId }) => {
-    const api = CONFIG.URLAPI;
     const token = useToken();
     const shopid = getLocalStorageItem('shopid');
     const userid = getLocalStorageItem('user_uuid');
-    const country = getCountry();
-    // const [searchAgent, setSearchAgent] = useState<any>({
-    //     shopid: shopid,
-    //     dataSearch: '',
-    //     status: ''
-    // });
-
-    // const handleInputChange = (value: string) => {
-    //     const firstTwoChars = value.slice(0, 2).toLowerCase();
-    //     const newStatus = firstTwoChars === 'ag' ? 1 : 2;
-    //     setSearchAgent((prevState: any) => ({
-    //         ...prevState,
-    //         dataSearch: value,
-    //         status: newStatus
-    //     }));
-    // };
+    const country = useCountry();
 
     const [inputs, setInputs] = useState<any>({
         shopid: shopid,
@@ -119,7 +103,7 @@ const FormPaySales: React.FC<Props> = ({ open, handleClose, data, reSpons, billI
     const handleCountry = (value: string | number, _event: React.SyntheticEvent) => {
         const selected = country.find((item) => item.value === value);
         const rate = selected?.rate ?? 1;
-        const genusSymbol = selected?.genus ?? "₭";
+        const genusSymbol = selected?.genus ?? "";
         setFlag(selected?.icon ?? '');
         setGenus(genusSymbol);
         setInputs((prev: any) => ({
@@ -136,10 +120,7 @@ const FormPaySales: React.FC<Props> = ({ open, handleClose, data, reSpons, billI
         }));
     };
 
-    function toThousands(value: number | string | null | undefined) {
-        if (!value) return '0 ' + genus;
-        return `${value}`.replace(/\d{1,3}(?=(\d{3})+(\.\d*)?$)/g, '$&,') + ' ' + genus;
-    }
+    const formatWithGenus = (value: number | string | null | undefined) => toThousands(value, genus);
 
     const speaker = (
         <Popover title="ສະກຸນເງິນ" >
@@ -156,7 +137,7 @@ const FormPaySales: React.FC<Props> = ({ open, handleClose, data, reSpons, billI
         event.preventDefault();
         setLoading(true);
         try {
-            const res = await axios.post(api + '/billsale/create', inputs, {
+            const res = await postApi('/billsale/create', inputs, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 }
@@ -281,7 +262,7 @@ const FormPaySales: React.FC<Props> = ({ open, handleClose, data, reSpons, billI
                                     <div className="widget widget-stats bg-orange">
                                         <div className="stats-info">
                                             <h3>ລວມຍອດຂາຍ</h3>
-                                            <p className='fs-1'>{numeral(data.total).format('0,0')} ₭</p>
+                                            <p className='fs-1'>{toThousands(data.total, genus)}</p>
                                         </div>
                                     </div>
                                 </div>
@@ -296,8 +277,8 @@ const FormPaySales: React.FC<Props> = ({ open, handleClose, data, reSpons, billI
                                         </Whisper>
                                     </div>
                                     <div className="stats-info">
-                                        <h3>ຍອດທີ່ຕ້ອງຈ່າຍ <span className="text-orange fs-5">({flag}: {inputs.rate} ₭)</span></h3>
-                                        <p className='fs-1'>{numeral(inputs.balance_payable).format('0,0.000')} {genus}</p>
+                                        <h3>ຍອດທີ່ຕ້ອງຈ່າຍ <span className="text-orange fs-5">({flag}: {toThousands(inputs.rate, genus)})</span></h3>
+                                        <p className='fs-1'>{toThousands(numeral(inputs.balance_payable).format('0,0.000'), genus)}</p>
                                     </div>
                                 </div>
                             </div>
@@ -308,7 +289,7 @@ const FormPaySales: React.FC<Props> = ({ open, handleClose, data, reSpons, billI
                             <div className={`${inputs.discount > 0 ? 'col-sm-6 col-6' : 'col-sm-12 col-12'} mb-2`}>
                                 <div className="form-group">
                                     <label htmlFor="" className="form-label fs-5">ສ່ວນຫຼົດ</label>
-                                    <NumberInput ref={cashRef} size='lg' value={inputs.discount} onChange={(value) => handleChange('discount', value)} onFocus={() => handleFocus("discount")} placeholder="0,00" formatter={toThousands} className='px-1 border-orange' />
+                                    <NumberInput ref={cashRef} size='lg' value={inputs.discount} onChange={(value) => handleChange('discount', value)} onFocus={() => handleFocus("discount")} placeholder="0,00" formatter={formatWithGenus} className='px-1 border-orange' />
                                 </div>
                             </div>
                             {inputs.discount > 0 && (
@@ -316,7 +297,7 @@ const FormPaySales: React.FC<Props> = ({ open, handleClose, data, reSpons, billI
                                     <div className="form-group">
                                         <label htmlFor="" className="form-label fs-5">ຍອດທີ່ຕ້ອງຈ່າຍ</label>
                                         <InputGroup inside className='bg-green-300 text-white'>
-                                            <InputGroup.Addon className='text-white'>{genus}</InputGroup.Addon>
+                                            {genus && <InputGroup.Addon className='text-white'>{genus}</InputGroup.Addon>}
                                             <Input size='lg' value={numeral(inputs.balanceTotal).format('0,0.00')} placeholder="0,00" className='px-1 fs-bold bg-green-300 text-white' />
                                         </InputGroup>
                                     </div>
@@ -326,13 +307,13 @@ const FormPaySales: React.FC<Props> = ({ open, handleClose, data, reSpons, billI
                             <div className="col-sm-6 mb-2">
                                 <div className="form-group">
                                     <label htmlFor="" className="form-label fs-5">ຮັບເງິນສົດ</label>
-                                    <NumberInput ref={transferRef} size='lg' value={inputs.getCash} onChange={(value) => handleChange('getCash', value)} onFocus={() => handleFocus("getCash")} placeholder="0,00" formatter={toThousands} className='px-1' />
+                                    <NumberInput ref={transferRef} size='lg' value={inputs.getCash} onChange={(value) => handleChange('getCash', value)} onFocus={() => handleFocus("getCash")} placeholder="0,00" formatter={formatWithGenus} className='px-1' />
                                 </div>
                             </div>
                             <div className="col-sm-6 mb-2">
                                 <div className="form-group">
                                     <label htmlFor="" className="form-label fs-5">ຮັບເງິນໂອນ</label>
-                                    <NumberInput ref={discountRef} size='lg' value={inputs.getTransfer} onChange={(value) => handleChange('getTransfer', value)} onFocus={() => handleFocus("getTransfer")} placeholder="0,00" formatter={toThousands} className='px-1' />
+                                    <NumberInput ref={discountRef} size='lg' value={inputs.getTransfer} onChange={(value) => handleChange('getTransfer', value)} onFocus={() => handleFocus("getTransfer")} placeholder="0,00" formatter={formatWithGenus} className='px-1' />
                                 </div>
                             </div>
                             {inputs.refund > 0 && (
@@ -348,7 +329,7 @@ const FormPaySales: React.FC<Props> = ({ open, handleClose, data, reSpons, billI
                             <Grid fluid className="w-100 mt-1">
                                 <Row gutter={4}>
                                     {autoAmounts.map((amt) => (
-                                        <Col xs={6} key={amt}>
+                                        <Col span={{xs:6}} key={amt}>
                                             <Button
                                                 appearance="ghost"
                                                 size="lg"

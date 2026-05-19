@@ -4,15 +4,13 @@ import Link from 'next/link';
 import PageContainer from '@/components/PageContainer';
 import FormUnit from './FormUnit';
 import { Grid, Row, Col, InputGroup, Input, InputPicker, HStack, Placeholder, Loader } from 'rsuite';
-import { CONFIG } from '../../../utils/Config';
+import { getApi, deleteApi } from '../../../utils/Configs';
 import { usePage } from '../../../utils/selectOption';
 import { Notific } from '../../../utils/Notification';
-import axios from 'axios';
 import NextPages from '../../../utils/NextPages';
 import { useToken } from '@/hooks/useToken';
 import { getLocalStorageItem } from '@/utils/storage';
 const UnitPage: React.FC = () => {
-    const api = CONFIG.URLAPI;
     const shopid = getLocalStorageItem('shopid');
     const token = useToken();
 
@@ -39,12 +37,12 @@ const UnitPage: React.FC = () => {
     const fetchUnits = async () => {
         setIsLoading(true);
         try {
-            const response = await fetch(`${api}/unit/fetch/${shopid}?skip=${skipItem}&limit=${itemsPerPage}`,{
+            const response = await getApi(`/unit/fetch/${shopid}?skip=${skipItem}&limit=${itemsPerPage}`,{
                 headers: {
                     Authorization: `Bearer ${token}`,
                 }
             });
-            const jsonData = await response.json();
+            const jsonData = response.data;
             setItemData(jsonData.data);
             setFilter(jsonData.data);
             setTotalItems(jsonData.total)
@@ -66,7 +64,7 @@ const UnitPage: React.FC = () => {
     const handleDelete = (id:string) => {
         Notific.confirm('ທ່ານຕ້ອງການລົບຂໍ້ມູນນີ້ແທ້ບໍ່?', async () => {
             try {
-                const response = await axios.delete(api + '/unit/' + btoa(id),{
+                const response = await deleteApi('/unit/' + btoa(id),{
                     headers: {
                         Authorization: `Bearer ${token}`,
                     }
@@ -106,14 +104,14 @@ const columns = [
                 <div className="panel-body p-0">
                     <Grid fluid>
                         <Row gutter={16}>
-                            <Col xs={6} sm={8} md={8} lg={5} xl={4}>
+                            <Col span={{ xs: 6, sm: 8, md: 8, lg: 5, xl: 4 }}>
                                 <HStack>
                                     <label className='d-sm-block d-none'>ສະແດງ</label>
                                     <InputPicker data={pages} value={itemsPerPage} onChange={(e) => setItemsPerPage(e)} />
                                     <label className='d-sm-block d-none'>ລາຍການ</label>
                                 </HStack>
                             </Col>
-                            <Col xs={10} xsPush={8} sm={8} smPush={8} lg={6} lgPush={13} xl={6} xlPush={14}>
+                            <Col span={{ xs: 10, sm: 8, lg: 6, xl: 6 }} push={{ xs: 8, sm: 8, lg: 13, xl: 14 }}>
                                 <InputGroup inside>
                                     <InputGroup.Addon><i className="fas fa-search" /></InputGroup.Addon>
                                     <Input placeholder="ຄົ້ນຫາ" onChange={(e) => handleFilter(e)} />

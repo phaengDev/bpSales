@@ -2,8 +2,7 @@
 import React, { useState, useEffect } from 'react'
 import { Modal, Button, Input, SelectPicker } from 'rsuite';
 import { Notific } from '../../../utils/Notification';
-import axios from 'axios';
-import { CONFIG } from  '../../../utils/Config';
+import { postApi, putApi } from '../../../utils/Configs';
 import { useCategory } from '../../../utils/selectOption';
 import { useToken } from '@/hooks/useToken';
 interface Props {
@@ -13,7 +12,6 @@ interface Props {
   fetchData: (data: any) => void;
 }
 const FormBrand: React.FC<Props> = ({ open, handleClose, data,fetchData }) =>{
-const api = CONFIG.URLAPI;
 const token = useToken();
 const categories=useCategory();
 
@@ -28,7 +26,7 @@ const [loading, setLoading] = useState(false);
         try {
         setLoading(true);
         if (data) {
-            const res = await  axios.put(api + `/brand/${btoa(data.brand_uuid)}`, values,{
+            const res = await  putApi(`/brand/${btoa(data.brand_uuid)}`, values,{
                 headers: {
                     Authorization: `Bearer ${token}`,
                 }
@@ -39,7 +37,7 @@ const [loading, setLoading] = useState(false);
                 fetchData(res.data.data);
             }
         }else {
-        const res = await  axios.post(api + '/brand/create', values,{
+        const res = await  postApi('/brand/create', values,{
             headers: {
                 Authorization: `Bearer ${token}`,
             }

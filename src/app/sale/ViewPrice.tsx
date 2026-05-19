@@ -3,9 +3,8 @@ import React, { useState } from 'react';
 import numeral from 'numeral';
 import { Modal } from 'react-bootstrap';
 import { Grid, Row, Col, Stat, Loader } from 'rsuite';
-import { CONFIG } from '@/utils/Config';
+import { putApi } from '@/utils/Configs';
 import { Notific } from '@/utils/Notification';
-import axios from 'axios';
 import { useToken } from '@/hooks/useToken';
 interface Props {
     open: boolean;
@@ -15,12 +14,11 @@ interface Props {
 }
 const ViewPrice: React.FC<Props> = ({ open, onClose, data, resPonse }) => {
     const token = useToken();
-    const api = CONFIG.URLAPI;
     const [loading, setLoading] = useState(false);
     const handleUpdate = async (price: number) => {
         setLoading(true);
         try {
-            const res = await axios.put(api + '/order/price/' + data.cart_uuid, { salePrices: price }, {
+            const res = await putApi('/order/price/' + data.cart_uuid, { salePrices: price }, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 }

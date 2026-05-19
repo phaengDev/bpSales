@@ -1,12 +1,9 @@
 import { useMemo } from "react";
 import ArrowRightLineIcon from "@rsuite/icons/ArrowRightLine";
 import { useState, useEffect } from "react";
-import { CONFIG } from '../utils/Config';
+import { getApi } from '../utils/Configs';
 import { useToken } from '@/hooks/useToken';
 import { getLocalStorageItem } from '@/utils/storage'
-import axios from "axios";
-const api = CONFIG.URLAPI;
-
 const shopid = getLocalStorageItem("shopid");
 
 // ===== Province =====
@@ -20,8 +17,8 @@ export function useProvince() {
   useEffect(() => {
     const showProvince = async () => {
       try {
-        const response = await fetch(`${api}/address/province`);
-        const jsonData = await response.json();
+        const response = await getApi('/address/province');
+        const jsonData = response.data;
         setItemProvince(jsonData.data);
       } catch (error) {
         console.error("Error fetching provinces:", error);
@@ -49,8 +46,8 @@ export function useDistrict(id?: string | number) {
     if (!id) return;
     const showDistrict = async () => {
       try {
-        const response = await fetch(`${api}/address/district/pv/${id}`);
-        const jsonData = await response.json();
+        const response = await getApi(`/address/district/pv/${id}`);
+        const jsonData = response.data;
         setItemDistrict(jsonData.data);
       } catch (error) {
         console.error("Error fetching districts:", error);
@@ -77,14 +74,14 @@ export function useUser() {
   useEffect(() => {
     const showUser = async () => {
       try {
-        const response = await fetch(`${api}/user/option/${shopid}`,
+        const response = await getApi(`/user/option/${shopid}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
             },
           }
         );
-        const jsonData = await response.json();
+        const jsonData = response.data;
         setItemUser(jsonData.data || []);
       } catch (error) {
         console.error("Error fetching categories:", error);
@@ -110,14 +107,14 @@ export function useCategory() {
   useEffect(() => {
     const showCategory = async () => {
       try {
-        const response = await fetch(`${api}/category/option/${shopid}`,
+        const response = await getApi(`/category/option/${shopid}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
             },
           }
         );
-        const jsonData = await response.json();
+        const jsonData = response.data;
         setItemCategory(jsonData.data || []);
       } catch (error) {
         console.error("Error fetching categories:", error);
@@ -147,14 +144,14 @@ export function useBrand(id?: string | number) {
     if (!id && !token) return;
     const showBrands = async () => {
       try {
-        const response = await fetch(`${api}/brand/option/${id}`,
+        const response = await getApi(`/brand/option/${id}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
             },
           }
         );
-        const jsonData = await response.json();
+        const jsonData = response.data;
         setItemBrand(jsonData.data || []);
       } catch (error) {
         console.error("Error fetching brands:", error);
@@ -182,12 +179,12 @@ export function useUnite() {
   useEffect(() => {
     const showUnite = async () => {
       try {
-        const response = await fetch(`${api}/unit/option/${shopid}`, {
+        const response = await getApi(`/unit/option/${shopid}`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         });
-        const jsonData = await response.json();
+        const jsonData = response.data;
         setItemUnite(jsonData.data || []);
       } catch (error) {
         console.error("Error fetching units:", error);
@@ -214,12 +211,12 @@ export function useSizes() {
   useEffect(() => {
     const showSizes = async () => {
       try {
-        const response = await fetch(`${api}/size/option/${shopid}`, {
+        const response = await getApi(`/size/option/${shopid}`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         });
-        const jsonData = await response.json();
+        const jsonData = response.data;
         setItemSizes(jsonData.data || []);
       } catch (error) {
         console.error("Error fetching sizes:", error);
@@ -254,7 +251,7 @@ export function useProduct(id: string | number | null) {
     const showProduct = async () => {
       try {
         setLoading(true);
-        const response = await axios.get(`${api}/product/option/${id}`, {
+        const response = await getApi(`/product/option/${id}`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -290,8 +287,8 @@ export function useRights() {
   useEffect(() => {
     const showRights = async () => {
       try {
-        const response = await fetch(`${api}/rights`);
-        const jsonData: Rights[] = await response.json();
+        const response = await getApi('/rights');
+        const jsonData: Rights[] = response.data;
         setItemRights(jsonData);
       } catch (error) {
         console.error("Error fetching rights:", error);
@@ -324,12 +321,12 @@ export function useSupplier() {
   useEffect(() => {
     const showSupplier = async () => {
       try {
-        const response = await fetch(`${api}/supplier/option/${shopid}`, {
+        const response = await getApi(`/supplier/option/${shopid}`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         });
-        const jsonData = await response.json();
+        const jsonData = response.data;
         console.log(jsonData.data);
         setItemSupplier(jsonData.data || []);
       } catch (error) {
@@ -358,13 +355,13 @@ interface Country {
   abbr: string;
 }
 
-export function getCountry() {
+export function useCountry() {
   const [itemCountry, setItemCountry] = useState<Country[]>([]);
   useEffect(() => {
     const showCountry = async () => {
       try {
-        const response = await fetch(`${api}/address/country/${shopid}`);
-        const jsonData: Country[] = await response.json();
+        const response = await getApi(`/address/country/${shopid}`);
+        const jsonData: Country[] = response.data;
         setItemCountry(jsonData);
       } catch (error) {
         console.error("Error fetching countries:", error);
@@ -383,20 +380,20 @@ export function getCountry() {
   }));
 }
 
-export const getExpress = () => {
+export const useExpress = () => {
   const [itemExpress, setItemExpress] = useState<any[]>([]);
   useEffect(() => {
     const showExpress = async () => {
       try {
-        const response = await fetch(`${api}/address/company`);
-        const jsonData = await response.json();
+        const response = await getApi('/address/company');
+        const jsonData = response.data;
         setItemExpress(jsonData || []);
       } catch (error) {
         console.error("Error fetching express:", error);
       }
     };
     showExpress();
-  }, [api]);
+  }, []);
 
   return itemExpress.map(item => ({
     value: item._uuid,
@@ -471,4 +468,3 @@ export const usePage = (total: number) => {
 
   return limit;
 };
-

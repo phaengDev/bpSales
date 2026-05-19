@@ -1,69 +1,77 @@
 'use client'
-import React, { useState, useEffect } from 'react';
-import { Modal, Button, Message, Textarea, Loader } from 'rsuite';
-import moment from 'moment';
+import React, { useState } from 'react';
+import {  IconButton, Image, InputGroup, Input, Loader, Message, Textarea, Button } from 'rsuite';
+import { Modal } from 'react-bootstrap';
+import CloseIcon from '@rsuite/icons/Close';
+import { postApi } from '@/utils/Configs';
 import numeral from 'numeral';
 import { useToken } from '@/hooks/useToken';
 import { getLocalStorageItem } from '@/utils/storage';
-import { putApi } from '@/utils/Configs';
 import { Notific } from '@/utils/Notification';
+import moment from 'moment';
 interface Props {
     open: boolean;
     onClose: () => void;
-    data: any;
-    resPonse: (data: any) => void
 }
-const FromCancel: React.FC<Props> = ({ open, onClose, data, resPonse }) => {
+const FromSearch: React.FC<Props> = ({ open, onClose }) => {
     const token = useToken();
     const userid = getLocalStorageItem('user_uuid');
-    const [values, setValues] = useState<any>({
-        createby: userid,
+
+    const [data, setData] = useState<any>('');
+    const [search, setSearch] = useState({
+        billSale: '',
         description: ''
     });
-    const [loading, setLoading] = useState(false);
-    const handleSave = async () => {
-        Notific.confirm('ທ່ານຕ້ອງການຍົກເລີກຂໍ້ມູນນີ້ແທ້ບໍ່?', async () => {
-            try {
-                setLoading(true);
-                const res = await putApi(`/billsale/cancel/${btoa(data.bill_uuid)}`, values, {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    }
-                })
-                if (res.status === 200) {
-                    Notific.success(res.data.message);
-                    onClose();
-                    resPonse(res.data.data);
+    const [loadsearch, setLoadSearch] = useState(false);
+    const handleSearch = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        setLoadSearch(true);
+        try {
+            const res = await postApi(`/billsale/search`, search, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
                 }
-            } catch (error) {
-                console.error('ບໍ່ສາມາດສົ່ງຂໍ້ມູນນີ້ໄດ້', error);
-                Notific.error('ບໍ່ສາມາດຍົກເລີກຂໍ້ມູນນີ້ໄດ້');
-            } finally {
-                setLoading(false);
-            }
-        });
-    }
-    useEffect(() => {
-        if (userid) {
-            setValues({
-                createby: userid,
-                description: ''
             });
+            const dataJson = res.data.data;
+            if (res.status === 200) {
+                setData(dataJson);
+            }
+        } catch (error) {
+            setData('');
+            Notific.warning(`ບໍ່ພົບຂໍ້ມູນໃນເລກບິນ ${search.billSale} ນີ້`);
+            console.log(error);
+        } finally {
+            setLoadSearch(false);
         }
-    }, [data, userid]);
+    }
+const [values, setValues] = useState({
+   createby: userid,
+        description: ''
+})
 
     return (
-        <Modal open={open} onClose={onClose}>
-            <Modal.Body className='body  p-0'>
-                <main className="container mb-3" id="print-page-1">
-                    <div className="receipt-top">
-                        <div className="company-logo">
-                            <img src="/assets/img/logo/PLC.png" className="img-fluid w-25" alt="Company Logo" />
-                        </div>
-                        <div className="company-name">{data?.shop?.shopName}</div>
-                        <div className="company-address mt-n2">{data?.shop?.village}, {data?.shop?.district?.distName},  {data?.shop?.district?.province?.provinceName}</div>
-                        <div className="company-mobile">ໂທລະສັບ: {data?.shop?.phone}</div>
-                    </div>
+        <Modal show={open} onHide={onClose} size='lg' >
+            <Modal.Body className="py-1" >
+                <div className="text-center py-4 ">
+                    <Image width={150} bordered circle src="../assets/img/icon/bill-checkout.png" className='p-1 border-red' />
+                </div>
+                <div className="form-group mb-3">
+                    <form onSubmit={handleSearch} className='text-center'>
+                        <label htmlFor="" className='form-label fs-3'>ຄົນຫາເລກບິນທີ່ຕ້ອງການຍົກເລີກ</label>
+                        <InputGroup size="lg" className='rounded-pill border-red p-0-5'>
+                            <Input placeholder={'ຄົນຫາເລກບິນ'} value={search.billSale} onChange={(value) =>
+                                setSearch({
+                                    ...search,
+                                    billSale: value.replace(/\s+/g, "")  // ตัดช่องว่างทั้งหมด
+                                })
+                            } className='px-3' required />
+                            <InputGroup.Button type='submit' appearance='primary' color='red' className='rounded-pill px-4'>{loadsearch ? <Loader /> : <><i className="fa-solid fa-search me-1" /> ຄົນຫາ</>} </InputGroup.Button>
+                        </InputGroup>
+                    </form>
+                </div>
+                <main className="container card  mb-3" id="print-page-1">
+                    <div className='text-end me-n2-05 pb-2'><IconButton color="red" icon={<CloseIcon size={'2rm'} />} appearance="ghost" size="xs" /></div>
+                    <div className='card-body p-0 py-3'>
                     <ul className="text-list text-style1 mb-20">
                         <li>
                             <div className="text-list-title">Date:</div>
@@ -126,7 +134,7 @@ const FromCancel: React.FC<Props> = ({ open, onClose, data, resPonse }) => {
                         </div>
                         <div className="text-receipt-seperator"></div>
                     </div>
-                    <div className="mb-0 text-start">
+                    <div className="mb-3 text-start">
                         {data?.status === 2 ? (
                             <Message showIcon type="error" header="ຂໍອະໄພ!">
                                 ບິນນີ້ໄດ້ມີການຍົກເລີກບິນແລ້ວ ກະລຸນາກວດຄືນ
@@ -146,17 +154,12 @@ const FromCancel: React.FC<Props> = ({ open, onClose, data, resPonse }) => {
                             </div>
                         )}
                     </div>
+                    <Button appearance='primary' block>ບິນຍົກເລີກ</Button>
+                    </div>
                 </main>
             </Modal.Body>
-            <Modal.Footer>
-                <Button appearance="primary" color="red" onClick={onClose}> ອອກ </Button>
-                {data?.status === 1 && data?.statusoff === 1 && (
-                    <Button appearance="primary" disabled={loading} onClick={handleSave}>{loading ? <Loader content='ກຳລັງກວດ...' /> : 'ຢືນຢັນຍົກເລີກ'} </Button>
-                )}
-
-            </Modal.Footer>
         </Modal>
     )
 }
 
-export default FromCancel
+export default FromSearch

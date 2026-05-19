@@ -5,8 +5,7 @@ import { IconButton, InputGroup, Input, Grid, Row, Col, DateRangePicker, Button,
 import { setupDate } from '@/utils/formate';
 import moment from 'moment';
 import PageContainer from '@/components/PageContainer';
-import axios from 'axios';
-import { CONFIG } from '@/utils/Config';
+import { postApi } from '@/utils/Configs';
 import numeral from 'numeral';
 import NextPages from '@/utils/NextPages';
 import { Notific } from '@/utils/Notification';
@@ -16,7 +15,6 @@ import SearchIcon from '@rsuite/icons/Search';
 import FromCancel from './FromCancel';
 import { usePage, useUser } from '@/utils/selectOption';
 const CancleSale: React.FC = () => {
-    const api = CONFIG.URLAPI;
     const shopid = getLocalStorageItem('shopid');
     const token = useToken();
     const [search, setSearch] = useState({
@@ -30,7 +28,7 @@ const CancleSale: React.FC = () => {
         e.preventDefault();
         setLoadSearch(true);
         try {
-            const res = await axios.post(`${api}/billsale/search`, search, {
+            const res = await postApi(`/billsale/search`, search, {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
@@ -69,7 +67,7 @@ const CancleSale: React.FC = () => {
     const fetchData = async () => {
         setIsLoading(true);
         try {
-            const response = await axios.post(`${api}/billsale/fetch/cancel?skip=${offset}&limit=${itemsPerPage}`, values, {
+            const response = await postApi(`/billsale/fetch/cancel?skip=${offset}&limit=${itemsPerPage}`, values, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },

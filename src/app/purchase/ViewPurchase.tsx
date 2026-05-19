@@ -3,8 +3,7 @@ import React,{ useState, useEffect,useRef} from 'react'
 import { Button,Loader} from 'rsuite';
 import { Modal } from 'react-bootstrap';
 import moment from 'moment';
-import { CONFIG } from '@/utils/Config';
-import axios from 'axios';
+import { getApi } from '@/utils/Configs';
 import numeral from 'numeral';
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
@@ -17,14 +16,13 @@ interface Props {
     data: any;
 }
 const ViewPurchase: React.FC<Props> = ({ open, handleClose, data }) =>{
-    const api = CONFIG.URLAPI;
     const token = useToken();
     const shopId=getLocalStorageItem('shopid');
     const deletes=getLocalStorageItem('deletes');
     const [itemList, setItemList] = useState<any[]>([]);
     const feftchData = async () => {
         try {
-            const response = await axios.get(`${api}/purchase/main/${data._uuid}`, {
+            const response = await getApi(`/purchase/main/${data._uuid}`, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
@@ -38,7 +36,7 @@ const ViewPurchase: React.FC<Props> = ({ open, handleClose, data }) =>{
     const [shop,setShop]=useState<any>({});
     const fetchShop = async () => {
         try {
-            const response = await axios.get(`${api}/system/${shopId}`);
+            const response = await getApi(`/system/${shopId}`);
             setShop(response.data);
         } catch (error) {
             console.error("Error:", error);

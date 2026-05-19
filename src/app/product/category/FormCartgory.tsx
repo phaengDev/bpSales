@@ -2,8 +2,7 @@
 import React, { useState, useEffect } from 'react'
 import { Modal, Button, Input } from 'rsuite';
 import { Notific } from '../../../utils/Notification';
-import axios from 'axios';
-import { CONFIG } from '../../../utils/Config';
+import { postApi, putApi } from '../../../utils/Configs';
 import { useToken } from '@/hooks/useToken';
 import { getLocalStorageItem } from '@/utils/storage';
 interface Props {
@@ -13,7 +12,6 @@ interface Props {
     fetchData: (data: any) => void;
 }
 const Formcartgory: React.FC<Props> = ({ open, handleClose, data, fetchData }) => {
-    const api = CONFIG.URLAPI;
     const shopid = getLocalStorageItem('shopid');
     const token = useToken();
     const [values, setValues] = useState({
@@ -27,7 +25,7 @@ const [loading, setLoading] = useState(false);
         try {
             setLoading(true);
             if (data) {
-                const res = await axios.put(api + `/category/${btoa(data.cate_uuid)}`, values, {
+                const res = await putApi(`/category/${btoa(data.cate_uuid)}`, values, {
                     headers: {
                         Authorization: `Bearer ${token}`,
                     }
@@ -38,7 +36,7 @@ const [loading, setLoading] = useState(false);
                     fetchData(res.data.data);
                 }
             } else {
-                const res = await axios.post(api + '/category/create', values, {
+                const res = await postApi('/category/create', values, {
                     headers: {
                         Authorization: `Bearer ${token}`,
                     }

@@ -3,8 +3,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import PageContainer from '@/components/PageContainer';
 import { Grid, Row, Col, InputGroup, Input, HStack, DatePicker, SelectPicker, Button, InputPicker, Tag ,Placeholder} from 'rsuite';
-import { CONFIG } from '@/utils/Config';
-import axios from 'axios';
+import { postApi } from '@/utils/Configs';
 import { Notific } from '@/utils/Notification';
 import { useSupplier } from '@/utils/selectOption';
 import moment from 'moment';
@@ -16,7 +15,6 @@ import { getLocalStorageItem } from '@/utils/storage';
 import CheckRoundIcon from '@rsuite/icons/CheckRound';
 import RemindFillIcon from '@rsuite/icons/RemindFill';
 const PurchasePage: React.FC = () => {
-    const api = CONFIG.URLAPI;
     const suppliers = useSupplier();
     const token = useToken();
     const shopid = getLocalStorageItem('shopid');
@@ -41,7 +39,7 @@ const PurchasePage: React.FC = () => {
         if (!token) return;
         setIsLoading(true);
         try {
-            const response = await axios.post(`${api}/purchase/fetch?skip=${skipItem}&limit=${itemsPerPage}`, values, {
+            const response = await postApi(`/purchase/fetch?skip=${skipItem}&limit=${itemsPerPage}`, values, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 }
@@ -158,7 +156,7 @@ const columns = [
                     </div>
                     <Grid fluid>
                         <Row className="show-grid">
-                            <Col xs={4} sm={6} md={4} lg={4}>
+                            <Col span={{ xs: 4, sm: 6, md: 4, lg: 4 }}>
                                 <HStack className='fs-14px'>
                                     <label htmlFor="" className='d-sm-block d-none'>ສະແດງ</label>
                                     <select className="form-select fs-14px">
@@ -169,7 +167,7 @@ const columns = [
                                     <label htmlFor="" className='d-sm-block d-none'>ລາຍການ</label>
                                 </HStack>
                             </Col>
-                            <Col xs={12} xsPush={8} sm={10} smPush={8} md={8} mdPush={12} lg={6} lgPush={14}>
+                            <Col span={{ xs: 12, sm: 10, md: 8, lg: 6 }} push={{ xs: 8, sm: 8, md: 12, lg: 14 }}>
                                 <InputGroup inside>
                                     <InputGroup.Addon><i className="fa fa-search" /></InputGroup.Addon>
                                     <Input placeholder="ຄົ້ນຫາ ..." />

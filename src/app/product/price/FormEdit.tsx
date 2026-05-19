@@ -2,8 +2,7 @@
 import React, { useState, useEffect } from 'react'
 import { Modal, Button, Input, NumberInput } from 'rsuite'
 import { Notific } from '@/utils/Notification';
-import axios from 'axios';
-import { CONFIG } from '@/utils/Config';
+import { putApi } from '@/utils/Configs';
 import { useToken } from '@/hooks/useToken';
 interface Props {
     open: boolean,
@@ -12,7 +11,6 @@ interface Props {
     resPonse: (data: any) => void
 }
 const FormEdit: React.FC<Props> = ({ open, handleClose, data, resPonse }) => {
-    const api = CONFIG.URLAPI;
     const token = useToken();
     function toThousands(value: number | string | null | undefined) {
         if (!value) return '0 ₭';
@@ -28,7 +26,7 @@ const FormEdit: React.FC<Props> = ({ open, handleClose, data, resPonse }) => {
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
         try {
-            const res = await axios.put(api + '/wholesale/update', inputs, {
+            const res = await putApi('/wholesale/update', inputs, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 }

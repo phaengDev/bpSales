@@ -5,9 +5,8 @@ import { useRouter } from 'next/navigation'; // ✅ ใช้ navigate จาก
 import Navbar from './layout/Navbar';
 import Header from './layout/Header';
 // import Footer from './layout/Footer';
-import { CONFIG } from '@/utils/Config';
+import { getAuthApi } from '@/utils/Configs';
 // import { useToken } from '@/hooks/useToken';
-import axios from 'axios';
 
 interface PageContainerProps {
   children: React.ReactNode;
@@ -15,7 +14,6 @@ interface PageContainerProps {
 
 export default function PageContainer({ children }: PageContainerProps) {
   const router = useRouter();
-  const api = CONFIG.URLAUTH;
   const [token, setToken] = useState<string | null>(null);
 
   useEffect(() => {
@@ -31,7 +29,7 @@ useEffect(() => {
       return;
     }
     try {
-      const resp = await axios.get(`${api}/verify`, {
+      const resp = await getAuthApi('/verify', {
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -41,13 +39,13 @@ useEffect(() => {
       if (resp.status === 200) {
         return;
       }
-    } catch (error: any) {
+    } catch (error) {
       console.error('🚨 Network error (CORS, server down, etc):', error);
       router.push('/login');
     }
   };
   checkTokenAndMakeRequest();
-}, [token, api, router]);
+}, [token, router]);
 
   return (
     <div id="app" className="app app-header-fixed app-sidebar-fixed app-gradient-enabled app-content-full-height" >

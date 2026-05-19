@@ -7,13 +7,12 @@ import { useToken } from '@/hooks/useToken';
 import { getLocalStorageItem } from '@/utils/storage';
 // import PageEndIcon from '@rsuite/icons/PageEnd';
 import SearchIcon from '@rsuite/icons/Search';
-import { usePage,getExpress } from '@/utils/selectOption';
+import { usePage,useExpress } from '@/utils/selectOption';
 import GridIcon from '@rsuite/icons/Grid';
 import CheckIcon from '@rsuite/icons/Check';
 import MoveDownIcon from '@rsuite/icons/MoveDown';
-import axios from 'axios';
 import numeral from 'numeral';
-import { CONFIG } from '@/utils/Config';
+import { postApi } from '@/utils/Configs';
 import moment from 'moment';
 import NextPages from '@/utils/NextPages';
 import DocPassIcon from '@rsuite/icons/DocPass';
@@ -26,10 +25,9 @@ import { BsPaypal } from "react-icons/bs";
 import { MdAccountBalanceWallet } from "react-icons/md";
 import { FaListOl } from "react-icons/fa";
 const SalesOnle: React.FC = () => {
-    const api = CONFIG.URLAPI;
     const token = useToken();
     const shopid = getLocalStorageItem('shopid');
-    const company = getExpress();
+    const company = useExpress();
     const [values, setValues] = useState({
         shopid: shopid,
         companyid: '',
@@ -51,7 +49,7 @@ const [sum,setSum] = useState<any>({});
     const fetchData = async () => {
         setIsLoading(true);
         try {
-            const response = await axios.post(`${api}/online/fetch?skip=${offset}&limit=${itemsPerPage}`, values, {
+            const response = await postApi(`/online/fetch?skip=${offset}&limit=${itemsPerPage}`, values, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
@@ -257,14 +255,14 @@ const [sum,setSum] = useState<any>({});
             </Grid>
             <Grid fluid className='mb-1'>
                 <Row className="show-grid">
-                    <Col xs={6} sm={8} md={8} lg={5} xl={4}>
+                    <Col span={{ xs: 6, sm: 8, md: 8, lg: 5, xl: 4 }}>
                         <HStack>
                             <label className='d-sm-block d-none'>ສະແດງ</label>
                             <InputPicker data={pages} value={itemsPerPage} onChange={(e) => setItemsPerPage(e)} />
                             <label className='d-sm-block d-none'>ລາຍການ</label>
                         </HStack>
                     </Col>
-                    <Col xs={10} xsPush={8} sm={8} smPush={8} lg={6} lgPush={13} xl={6} xlPush={14}>
+                    <Col span={{ xs: 10, sm: 8, lg: 6, xl: 6 }} push={{ xs: 8, sm: 8, lg: 13, xl: 14 }}>
                         <InputGroup inside>
                             <InputGroup.Addon><SearchIcon /></InputGroup.Addon>
                             <Input onChange={handleFilter} placeholder="ເລກທີ່ບິນ /ຊື່ລູກຄ້າ.." />

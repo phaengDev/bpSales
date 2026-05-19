@@ -4,9 +4,8 @@ import Link from 'next/link';
 import PageContainer from '@/components/PageContainer';
 import { Grid, Row, Col, Input, InputGroup, HStack, InputPicker, SelectPicker, Button, Placeholder, Loader, Toggle, Popover, Whisper, ButtonToolbar, IconButton } from 'rsuite';
 import FormProduct from './FormProduct';
-import axios from 'axios';
 import { usePage, useCategory, useBrand, useUnite, useSizes } from '../../utils/selectOption';
-import { CONFIG } from '../../utils/Config';
+import { postApi, putApi, deleteApi } from '../../utils/Configs';
 import { Notific } from '../../utils/Notification';
 import numeral from 'numeral';
 import ViewImage from './ViewImage';
@@ -20,8 +19,6 @@ import EditIcon from '@rsuite/icons/Edit';
 import TrashIcon from '@rsuite/icons/Trash';
 import AddPricebyProduct from './price/AddPricebyProduct';
 const ProductPage: React.FC = () => {
-    const api = CONFIG.URLAPI;
-
     const shopid = getLocalStorageItem('shopid') || null;
     const token = useToken();
 
@@ -60,7 +57,7 @@ const skipItem = (currentPage - 1) * itemsPerPage;
 const fetchProduct = async () => {
   setLoading(true);
   try {
-    const response = await axios.post(`${api}/product/fetch?skip=${skipItem}&limit=${itemsPerPage}`, searchTerm, {
+    const response = await postApi(`/product/fetch?skip=${skipItem}&limit=${itemsPerPage}`, searchTerm, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -104,7 +101,7 @@ const fetchProduct = async () => {
 
     const handleStatus = (id: string, sts: number) => {
         const newStatus = sts === 1 ? 2 : 1;
-        axios.put(api + `/product/status/${id}/${newStatus}`).then(function (resp) {
+        putApi(`/product/status/${id}/${newStatus}`).then(function (resp) {
             if (resp.status === 200) {
                 setResponse(resp.data.data);
                 Notific.success(resp.data.message);
@@ -119,7 +116,7 @@ const fetchProduct = async () => {
     const handleDelete = async (id: string) => {
         Notific.confirm('ທ່ານຕ້ອງການລົບຂໍ້ມູນນີ້ແທ້ບໍ່?', async () => {
             try {
-                const response = await axios.delete(api + '/product/' + btoa(id), {
+                const response = await deleteApi('/product/' + btoa(id), {
                     headers: {
                         Authorization: `Bearer ${token}`,
                     }
@@ -149,7 +146,7 @@ const fetchProduct = async () => {
 const deletePrice = (id: string) => {
     Notific.confirm('ທ່ານຕ້ອງການລົບຂໍ້ມູນນີ້ແທ້ບໍ່?', async () => {
         try {
-            const response = await axios.delete(api + '/price/' + btoa(id), {
+            const response = await deleteApi('/price/' + btoa(id), {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 }
@@ -248,14 +245,14 @@ const deletePrice = (id: string) => {
                     </div>
                     <Grid fluid className='mb-2'>
                         <Row className="show-grid">
-                            <Col xs={6} sm={8} md={8} lg={5} xl={4}>
+                            <Col span={{ xs: 6, sm: 8, md: 8, lg: 5, xl: 4 }}>
                                 <HStack>
                                     <label className='d-sm-block d-none'>ສະແດງ</label>
                                     <InputPicker data={pages} value={itemsPerPage} onChange={(e) => setItemsPerPage(e)} />
                                     <label className='d-sm-block d-none'>ລາຍການ</label>
                                 </HStack>
                             </Col>
-                            <Col xs={10} xsPush={8} sm={8} smPush={8} lg={6} lgPush={13} xl={6} xlPush={14}>
+                            <Col span={{ xs: 10, sm: 8, lg: 6, xl: 6 }} push={{ xs: 8, sm: 8, lg: 13, xl: 14 }}>
                                 <InputGroup inside>
                                     <InputGroup.Addon><SearchIcon /></InputGroup.Addon>
                                     <Input placeholder="ຄົ້ນຫາ" onChange={handleFilter} />

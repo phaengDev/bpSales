@@ -4,8 +4,7 @@ import { Modal, Button, SelectPicker, Card, IconButton, NumberInput, HStack, Ava
 import PlusRoundIcon from '@rsuite/icons/PlusRound';
 import MinusRoundIcon from '@rsuite/icons/MinusRound';
 import { useCategory } from '@/utils/selectOption';
-import { CONFIG } from '@/utils/Config';
-import axios from 'axios';
+import { postApi } from '@/utils/Configs';
 import { Notific } from '@/utils/Notification';
 import numeral from 'numeral';
 import { useToken } from '@/hooks/useToken';
@@ -19,7 +18,6 @@ interface Props {
     product: any
 }
 const FromAdd: React.FC<Props> = ({ open, onClose, data, resPonse, product }) => {
-    const api = CONFIG.URLAPI;
     const token = useToken();
     const categories = useCategory();
 
@@ -78,7 +76,7 @@ const FromAdd: React.FC<Props> = ({ open, onClose, data, resPonse, product }) =>
                 ...dataValue,
                 dataPs: rows,
             };
-            const response = await axios.post(api + '/promotion/create/mt', dataForm, {
+            const response = await postApi('/promotion/create/mt', dataForm, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },

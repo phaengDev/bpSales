@@ -3,8 +3,7 @@ import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import PageContainer from '@/components/PageContainer'
 import { Col, DatePicker, Grid, InputPicker, Row, Input, SelectPicker, HStack, InputGroup, Loader, Placeholder, Button, Tag, Dropdown } from 'rsuite';
-import axios from 'axios';
-import { CONFIG } from '@/utils/Config';
+import { postApi } from '@/utils/Configs';
 import numeral from 'numeral';
 import moment from 'moment';
 import NextPages from '@/utils/NextPages';
@@ -19,7 +18,6 @@ import FileDownloadIcon from '@rsuite/icons/FileDownload';
 import { BsFillPrinterFill } from "react-icons/bs";
 import { FaFilePdf } from "react-icons/fa6";
 const ReportDaily: React.FC = () => {
-    const api = CONFIG.URLAPI;
     const token = useToken();
     const shopid = getLocalStorageItem('shopid');
 
@@ -43,7 +41,7 @@ const ReportDaily: React.FC = () => {
     const fetchData = async () => {
         setIsLoading(true);
         try {
-            const response = await axios.post(`${api}/billsale/fetch?skip=${skipItem}&limit=${itemsPerPage}`, values, {
+            const response = await postApi(`/billsale/fetch?skip=${skipItem}&limit=${itemsPerPage}`, values, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },

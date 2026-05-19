@@ -4,12 +4,11 @@ import { Modal } from 'react-bootstrap';
 import numeral from 'numeral';
 import { Input, InputGroup, Button, Loader } from 'rsuite';
 import Select from "react-select";
-import { getExpress, useProvince } from '@/utils/selectOption';
+import { useExpress, useProvince } from '@/utils/selectOption';
 import { useToken } from '@/hooks/useToken';
 import { getLocalStorageItem } from '@/utils/storage';
-import { CONFIG } from '@/utils/Config';
+import { postApi } from '@/utils/Configs';
 import { Notific } from '@/utils/Notification';
-import axios from 'axios';
 interface Props {
     open: boolean;
     onClose: () => void;
@@ -23,14 +22,12 @@ interface OptionType {
 }
 
 const Payonline: React.FC<Props> = ({ open, onClose, data, resPonse }) => {
-
-    const api = CONFIG.URLAPI;
     const token = useToken();
 
     const userName = getLocalStorageItem('userName');
     const shopid = getLocalStorageItem('shopid');
 
-    const companies = getExpress();
+    const companies = useExpress();
     const provinces = useProvince();
 
     const [values, setValues] = useState<any>({
@@ -67,7 +64,7 @@ const Payonline: React.FC<Props> = ({ open, onClose, data, resPonse }) => {
         event.preventDefault();
         setLoading(true);
         try {
-            const res = await axios.post(api + '/billsale/create/online', values, {
+            const res = await postApi('/billsale/create/online', values, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 }
@@ -296,10 +293,6 @@ const Payonline: React.FC<Props> = ({ open, onClose, data, resPonse }) => {
                                     <Input as={'textarea'} rows={3} value={values.branch_name} onChange={(e) => setValues({ ...values, branch_name: e })} />
                                 </div>
                             </div>
-
-
-                            {/* Buttons */}
-
                         </div>
                     </div>
                 </Modal.Body>

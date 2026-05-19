@@ -4,8 +4,7 @@ import Link from 'next/link';
 import PageContainer from '@/components/PageContainer';
 import { Grid, Row, Col, InputGroup, Input, HStack, InputPicker, Placeholder, Loader, Toggle } from 'rsuite';
 import FormAdd from './FormAdd';
-import { CONFIG } from '../../utils/Config';
-import axios from 'axios';
+import { getApi, deleteApi } from '../../utils/Configs';
 import NextPages from '../../utils/NextPages';
 import { usePage } from '../../utils/selectOption';
 import { Notific } from '../../utils/Notification';
@@ -15,7 +14,6 @@ import SearchIcon from '@rsuite/icons/Search';
 import { useToken } from '@/hooks/useToken';
 import { getLocalStorageItem } from '@/utils/storage';
 const UserPage: React.FC = () => {
-    const api = CONFIG.URLAPI;
     const shopid = getLocalStorageItem('shopid') || null;
     const token = useToken();
 
@@ -39,7 +37,7 @@ const UserPage: React.FC = () => {
         if (!token || !shopid) return // ✅ ป้องกันตอนยังไม่มี token
         try {
             setIsLoading(true);
-            const res = await axios.get(`${api}/user/fetch/${shopid}?skip=${skip}&limit=${itemsPerPage}`, {
+            const res = await getApi(`/user/fetch/${shopid}?skip=${skip}&limit=${itemsPerPage}`, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 }
@@ -71,7 +69,7 @@ const UserPage: React.FC = () => {
     const handleDelete = (id: string) => {
         Notific.confirm('ທ່ານຕ້ອງການລົບຂໍ້ມູນນີ້ແທ້ບໍ່?', async () => {
             try {
-                const response = await axios.delete(api + '/user/' + btoa(id),{
+                const response = await deleteApi('/user/' + btoa(id),{
                     headers: {
                         Authorization: `Bearer ${token}`,
                     }
@@ -124,14 +122,14 @@ const UserPage: React.FC = () => {
                 <div className="panel-body p-0">
                     <Grid fluid className='mb-2'>
                         <Row className="show-grid">
-                            <Col xs={6} sm={8} md={6} lg={5} xl={4}>
+                            <Col span={{ xs: 6, sm: 8, md: 6, lg: 5, xl: 4 }}>
                                 <HStack>
                                     <label className='d-sm-block d-none'>ສະແດງ</label>
                                     <InputPicker data={pages} value={itemsPerPage} onChange={(e) => setItemsPerPage(e)} />
                                     <label className='d-sm-block d-none'>ລາຍການ</label>
                                 </HStack>
                             </Col>
-                            <Col xs={10} xsPush={8} sm={8} smPush={8} md={8} mdPush={10} lg={6} lgPush={13} xl={6} xlPush={14}>
+                            <Col span={{ xs: 10, sm: 8, md: 8, lg: 6, xl: 6 }} push={{ xs: 8, sm: 8, md: 10, lg: 13, xl: 14 }}>
                                 <InputGroup inside>
                                     <InputGroup.Addon><SearchIcon /></InputGroup.Addon>
                                     <Input placeholder="ຄົ້ນຫາ" onChange={hanleFilter} />
