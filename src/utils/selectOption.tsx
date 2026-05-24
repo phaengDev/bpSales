@@ -12,6 +12,23 @@ interface Province {
   _uuid: string | number;
 }
 
+export function useShop() {
+  const [shops, setShops] = useState<Province[]>([]);
+  useEffect(() => {
+    const showShop = async () => {
+      try {
+        const response = await getApi(`/shop/${shopid}`);
+        const jsonData = response.data;
+        setShops(jsonData.data);
+      } catch (error) {
+        console.error("Error fetching provinces:", error);
+      }
+    };
+    showShop();
+  }, []);
+
+  return shops;
+}
 export function useProvince() {
   const [itemProvince, setItemProvince] = useState<Province[]>([]);
   useEffect(() => {

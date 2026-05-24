@@ -289,7 +289,7 @@ const FormPaySales: React.FC<Props> = ({ open, handleClose, data, reSpons, billI
                             <div className={`${inputs.discount > 0 ? 'col-sm-6 col-6' : 'col-sm-12 col-12'} mb-2`}>
                                 <div className="form-group">
                                     <label htmlFor="" className="form-label fs-5">ສ່ວນຫຼົດ</label>
-                                    <NumberInput ref={cashRef} size='lg' value={inputs.discount} onChange={(value) => handleChange('discount', value)} onFocus={() => handleFocus("discount")} placeholder="0,00" formatter={formatWithGenus} className='px-1 border-orange' />
+                                    <NumberInput ref={cashRef} size='lg' value={inputs.discount} onChange={(value) => handleChange('discount', value)} onFocus={() => handleFocus("discount")} placeholder="0,00" formatter={formatWithGenus} className='px-1 border-orange' controls={false} />
                                 </div>
                             </div>
                             {inputs.discount > 0 && (
@@ -307,13 +307,13 @@ const FormPaySales: React.FC<Props> = ({ open, handleClose, data, reSpons, billI
                             <div className="col-sm-6 mb-2">
                                 <div className="form-group">
                                     <label htmlFor="" className="form-label fs-5">ຮັບເງິນສົດ</label>
-                                    <NumberInput ref={transferRef} size='lg' value={inputs.getCash} onChange={(value) => handleChange('getCash', value)} onFocus={() => handleFocus("getCash")} placeholder="0,00" formatter={formatWithGenus} className='px-1' />
+                                    <NumberInput ref={transferRef} size='lg' value={inputs.getCash} onChange={(value) => handleChange('getCash', value)} onFocus={() => handleFocus("getCash")} placeholder="0,00" formatter={formatWithGenus} className='px-1' controls={false} />
                                 </div>
                             </div>
                             <div className="col-sm-6 mb-2">
                                 <div className="form-group">
                                     <label htmlFor="" className="form-label fs-5">ຮັບເງິນໂອນ</label>
-                                    <NumberInput ref={discountRef} size='lg' value={inputs.getTransfer} onChange={(value) => handleChange('getTransfer', value)} onFocus={() => handleFocus("getTransfer")} placeholder="0,00" formatter={formatWithGenus} className='px-1' />
+                                    <NumberInput ref={discountRef} size='lg' value={inputs.getTransfer} onChange={(value) => handleChange('getTransfer', value)} onFocus={() => handleFocus("getTransfer")} placeholder="0,00" formatter={formatWithGenus} className='px-1' controls={false} />
                                 </div>
                             </div>
                             {inputs.refund > 0 && (

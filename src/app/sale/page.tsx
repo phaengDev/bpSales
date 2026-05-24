@@ -89,50 +89,87 @@ const SalesPage: React.FC = () => {
     const [product, setProduct] = useState<Product[]>([])
     const [filter, setFilter] = useState<any[]>([])
     const [isLoading, setIsLoading] = useState(false);
-    const [itemsPerPage, setItemsPerPage] = useState(25);
-    const [currentPage] = useState(1);
-    const offset = (currentPage - 1) * itemsPerPage;
-    const showProduct = async () => {
-        if (!token || !shopsId) return;
-        try {
+    const [isFetchingMore, setIsFetchingMore] = useState(false);
+    const [hasMore, setHasMore] = useState(true);
+    const skipRef = useRef(0);
+    const isFetchingRef = useRef(false);
+    const hasMoreRef = useRef(true);
+    const contentRef = useRef<HTMLDivElement>(null);
+    const LIMIT = 100;
+
+    const fetchProducts = async (
+        reset: boolean,
+        currentValues: typeof values,
+        currentToken: string,
+        currentShopsId: string
+    ) => {
+        if (!currentToken || !currentShopsId) return;
+        if (!reset && (!hasMoreRef.current || isFetchingRef.current)) return;
+
+        isFetchingRef.current = true;
+        const currentSkip = reset ? 0 : skipRef.current;
+
+        if (reset) {
+            skipRef.current = 0;
             setIsLoading(true);
-            const response = await postApi(`/product/sales?skip=${offset}&limit=${itemsPerPage}`, values,
-                {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                }
-            )
-            const jsonData = response.data;
-            setProduct(jsonData?.data || [])
-            setFilter(jsonData?.data || [])
-        } catch (error) {
-            console.error('Error fetching data:', error)
-        } finally {
-            setIsLoading(false);
+        } else {
+            setIsFetchingMore(true);
         }
-    }
 
+        try {
+            const response = await postApi(
+                `/product/sales?skip=${currentSkip}&limit=${LIMIT}`,
+                currentValues,
+                { headers: { Authorization: `Bearer ${currentToken}` } }
+            );
+            const newData: Product[] = response.data?.data || [];
+
+            if (reset) {
+                setProduct(newData);
+                setFilter(newData);
+            } else {
+                setProduct(prev => [...prev, ...newData]);
+                setFilter(prev => [...prev, ...newData]);
+            }
+
+            skipRef.current = currentSkip + newData.length;
+            const more = newData.length === LIMIT;
+            setHasMore(more);
+            hasMoreRef.current = more;
+        } catch (error) {
+            console.error('Error fetching data:', error);
+        } finally {
+            isFetchingRef.current = false;
+            setIsLoading(false);
+            setIsFetchingMore(false);
+        }
+    };
+
+    // ✅ Reset ແລະ ໂຫລດໃໝ່ ເມື່ອ filter ປ່ຽນ
     useEffect(() => {
-        const handleScroll = () => {
-            const bottom =
-                window.innerHeight + window.scrollY >=
-                document.documentElement.scrollHeight;
+        if (!token || !shopsId) return;
+        hasMoreRef.current = true;
+        setHasMore(true);
+        fetchProducts(true, values, token, shopsId);
+    }, [values, shopsId, token]);
 
-            if (bottom) {
-                setItemsPerPage((prev) => prev + 25);
+    // ✅ Infinite scroll — ເລື້ອນລົງສຸດໂຫລດເພີ່ມ 100 ລາຍການ
+    useEffect(() => {
+        const container = contentRef.current;
+        if (!container) return;
+
+        const handleScroll = () => {
+            const { scrollTop, scrollHeight, clientHeight } = container;
+            if (scrollTop + clientHeight >= scrollHeight - 150) {
+                if (token && shopsId) {
+                    fetchProducts(false, values, token, shopsId);
+                }
             }
         };
-        window.addEventListener("scroll", handleScroll);
-        return () => window.removeEventListener("scroll", handleScroll);
-    }, []);
 
-
-    // ✅ useEffect โหลดข้อมูลเมื่อค่าเปลี่ยน
-    useEffect(() => {
-        if (!token || !shopsId) return;
-        showProduct();
-    }, [values, shopsId, token])
+        container.addEventListener('scroll', handleScroll);
+        return () => container.removeEventListener('scroll', handleScroll);
+    }, [values, token, shopsId]);
 
     const [categoryId, setCategoryId] = useState(null);
     const handleSearch = (index: any) => {
@@ -370,7 +407,6 @@ const SalesPage: React.FC = () => {
                                             </button>
                                         </li>
                                     ))}
-
                                 </ul>
                             </div>
                         </div>
@@ -387,7 +423,7 @@ const SalesPage: React.FC = () => {
                     </div>
                     {/* END pos-menu */}
                     {/* BEGIN pos-content */}
-                    <div className="pos-content">
+                    <div className="pos-content" ref={contentRef}>
                         <div className='sticky-top bg-none  px-1 p-1 mb-2 rounded-3 nav-container' >
                             <Grid fluid>
                                 <Row>
@@ -464,7 +500,16 @@ const SalesPage: React.FC = () => {
                                         </div>
 
                                 }
-
+                                {!isLoading && isFetchingMore && (
+                                    <div className="w-100 d-flex justify-content-center align-items-center py-3">
+                                        <Loader size='md' content="ກຳລັງໂຫລດເພີ່ມ..." />
+                                    </div>
+                                )}
+                                {!isLoading && !hasMore && product.length > 0 && (
+                                    <div className="w-100 text-center py-2 text-muted fs-6">
+                                        ສະແດງທັງໝົດ {product.length} ລາຍການ
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </div>
